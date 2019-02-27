@@ -327,6 +327,7 @@
         cy2.layout({name: 'timeline', roots: '#dress-salad'});
         cy2.fit();
         cy2.userZoomingEnabled(false);
+        cy2.userPanningEnabled(false);
 
         var roots = [];
         for(var subTree of subTrees) {
@@ -376,6 +377,7 @@
         cy3.layout({name: 'timeline', roots: '#advance-prep'});
         cy3.fit();
         cy3.userZoomingEnabled(false);
+        cy3.userPanningEnabled(false);
         // var cy3 = cytoscape({
         //     container: document.getElementById('cy3'),
         //     style: styleObj,
@@ -411,6 +413,7 @@
     });
     cy.fit();
     cy.userZoomingEnabled(false);
+    cy.userPanningEnabled(false);
 </script>
 
 <script>
