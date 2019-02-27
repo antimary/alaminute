@@ -22,12 +22,13 @@
 
 <body>
     <!--<div><button onclick='separateAdvanceNodes()'>Separate</button></div>-->
+    <div id="title" style='text-align:center'><h1>Full Recipe</h1></div>
     <div id="cy"></div>
     <div id="cy2"></div>
     <div id="cy3"></div>
     <script src="mushroom-salad.js"></script>
-</body>
-
+    <button id='leftArrow' onclick='clickLeft()'>&lt-</button>
+    <button id='rightArrow' style='float:right;' onclick='clickRight()'>-></button>
 <script>
     var rowHeight = 90;
 
@@ -406,18 +407,66 @@
         // cy3.layout({name: 'breadthfirst', roots: '#prep-dressing'}).run();
     }
 
+    function clickLeft()
+    {
+        cycleGraph(-1);
+    }
+
+    function clickRight()
+    {
+        cycleGraph(1);
+    }
+
+    var graphs = ['cy', 'cy3', 'cy2'];
+    var titles = ['Full Recipe', 'Mise en Place', 'A la Minute'];
+    var currentGraphIndex = 0;
+    function cycleGraph(increment)
+    {
+        currentGraphIndex += increment;
+        currentGraphIndex %= graphs.length;
+        showCurrentGraph();
+    }
+
+    function showCurrentGraph()
+    {
+        for(var i=0; i<graphs.length; i++) {
+            var currentGraph = document.getElementById(graphs[i]);
+            if(i == currentGraphIndex) {
+                currentGraph.style.display = 'block';
+                document.getElementById('title').innerHTML = '<h1>' + titles[i] + '</h1>';
+            } else {
+                currentGraph.style.display = 'none';
+            }
+        }
+
+        var leftArrow = document.getElementById('leftArrow');
+        var rightArrow = document.getElementById('rightArrow');
+        if(currentGraphIndex == 0) {
+            leftArrow.style.display = 'none';
+            rightArrow.style.display = 'block';
+        } else if(currentGraphIndex == graphs.length-1) {
+            leftArrow.style.diplay = 'block';
+            rightArrow.style.display = 'none';
+        } else {
+            leftArrow.style.display = 'block';
+            rightArrow.style.display = 'block';
+        }
+    }
+</script>
+
+<script>
     cy.layout({name: 'timeline', roots: '#dress-salad'});
     //cy.layout({name: 'breadthfirst', roots: '#dress-salad', grid: true, transform: function(node, position) {return {x: -position.y, y: position.x};}}).run();
     cy.nodes().on('click', function(e) {
         console.log(e.target.position());
     });
+
     cy.fit();
     cy.userZoomingEnabled(false);
     cy.userPanningEnabled(false);
-</script>
-
-<script>
     separateAdvanceNodes();
+    showCurrentGraph();
 </script>
 
+</body>
 </html>
