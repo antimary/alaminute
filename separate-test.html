@@ -22,24 +22,25 @@
 
 <body>
     <!--<div><button onclick='separateAdvanceNodes()'>Separate</button></div>-->
+    <button id='leftArrow' style='float:left;' onclick='clickLeft()'>&lt-</button>
+    <button id='rightArrow' style='float:right;' onclick='clickRight()'>-></button>
     <div id="title" style='text-align:center'><h1>Full Recipe</h1></div>
+    <div id="time" style='text-align:center'>Total: 68 min / Active: 38 min</div>
+    <br />
     <div id="cy"></div>
     <div id="cy2"></div>
     <div id="cy3"></div>
     <script src="mushroom-salad.js"></script>
-    <button id='leftArrow' onclick='clickLeft()'>&lt-</button>
-    <button id='rightArrow' style='float:right;' onclick='clickRight()'>-></button>
 <script>
     var rowHeight = 110;
+    var totalTime = 0;
+    var activeTime = 0;
+    var previousNode = null;
 
     cytoscape('layout', 'timeline', function(layout) {
-        console.log(layout.cy.nodes());
-        var debugPosition = {x:0, y:0};
-        for(var i=0; i<layout.cy.nodes().length; i++) {
-            layout.cy.nodes()[i].position(debugPosition);
-            debugPosition.x += 125;
-            debugPosition.y += 0;
-        }
+        totalTime = 0;
+        activeTime = 0;
+        previousNode = null;
 
         // Get root node.
         var rootNode = layout.cy.nodes(layout.roots);
@@ -55,14 +56,13 @@
             var columnsInserted = 0;
 
             rootNode.position(position);
+            updateTotalTime(rootNode);
             row++;
             columnsInserted++;
             var stepColumn = columnsInserted;
 
             // 1 Additional Step Between
             var insertStep = null;
-            console.log("ADDITIONAL QUEUE");
-            console.log(additionalStepsQueue);
             if(additionalStepsQueue.length > 0) {
                 insertStep = additionalStepsQueue.shift();
             } else if(additionalSteps.length > 0) {
@@ -70,18 +70,11 @@
             }
 
             // positionStep
-            console.log("INSERT STEP");
-            console.log(insertStep);
             var stepRow = null;
             if(insertStep != null) {
                 stepRow = row;
-                console.log("DETAILS");
-                console.log(insertStep.data('id'));
-                console.log(position);
-                console.log(columnsInserted);
-                console.log(rowHeight);
-                console.log(row);
                 insertStep.position({x:position.x-125*columnsInserted, y:position.y+rowHeight*row});
+                updateTotalTime(insertStep);
                 row++;
                 columnsInserted++;
             }
@@ -123,13 +116,52 @@
             }
         }
 
+        console.log("TOTAL");
+        console.log(totalTime);
+
+        console.log("ACTIVE");
+        console.log(activeTime);
+
+        layout.cy.scratch('time', {total: totalTime, active: activeTime});
+        console.log("SCRATCH");
+        console.log(layout.cy.scratch('time'));
+
         // Add subTree logic after critical nodes
         // Why isn't mise en place root node getting positioned?
         // After you run out of critical nodes, positionSubTrees on remaining nodes.
         // Should work for mise en place case, because each child of root node is a subTree.
     });
 
-    function positionIngredients(additionalIngredients, position, row, column, stepColumn) {
+    function updateTotalTime(currentNode)
+    {
+        if(currentNode.data('duration')) {
+            if(previousNode == null) {
+                currentNode.data('totalTime', currentNode.data('duration'));
+            } else {
+                var sequentialTime = previousNode.data('totalTime') + currentNode.data('active');
+                var connectedTime = getMaxConnectedTime(currentNode) + currentNode.data('duration');
+                currentNode.data('totalTime', Math.max(sequentialTime, connectedTime));
+            }
+            totalTime = Math.max(totalTime, currentNode.data('totalTime'));
+            activeTime += currentNode.data('active');
+            previousNode = currentNode;
+        }
+    }
+
+    function getMaxConnectedTime(currentNode)
+    {
+        var maxTime = 0;
+        var connectedNodes = currentNode.outgoers('node');
+        for(var i=0; i<connectedNodes.length; i++) {
+            if(connectedNodes[i].data('totalTime')) {
+                maxTime = Math.max(maxTime, connectedNodes[i].data('totalTime'));
+            }
+        }
+        return maxTime;
+    }
+
+    function positionIngredients(additionalIngredients, position, row, column, stepColumn) 
+    {
         for(var i=0; i<additionalIngredients.length; i++) {
             if(column == stepColumn) {
                 column++;
@@ -139,6 +171,33 @@
             row++;
         }
         return {row: row, column: column};
+    }
+
+    // Function positionSubTree
+    // Test first by migrating while loop from layout and preserving functionality.
+    // Then, use on each subTree in Mise en Place graph.
+    function positionSubTree(insertStep, position, stepRow, columnsInserted)
+    {
+        while(insertStep != null && insertStep.length > 0) {
+            //var initialRow = row;
+            //var initialColumn = columnsInserted;
+            var insertIngredients = getAdditionalIngredients(insertStep);
+            var rc = positionIngredients(insertIngredients, position, stepRow, columnsInserted, columnsInserted);
+            //row = rc.row;
+            columnsInserted = rc.column;
+            // positionIngredients(ingredients, position, row(by value), column(by value))
+                // Need to figure out weird column logic.
+            insertStep = getAdditionalSteps(insertStep);
+            if(insertStep != null && insertStep.length > 0) {
+                insertStep.position({x:position.x-125*columnsInserted, y:position.y+rowHeight*stepRow});
+                updateTotalTime(insertStep);
+                columnsInserted++;
+            }
+            // positionStep(step, position, row(by value), column(by value)).
+                // Need to figure out what happens in multiple steps case.
+        }
+        
+        return columnsInserted;
     }
 
     function convertToArray(elementsObject) {
@@ -222,8 +281,6 @@
 
                 var subTreeNode = getNodeForSubtree(elements).clone();
                 subTreeNode.data('context', 'subTree');
-                console.log("NODE");
-                console.log(subTreeNode);
                 var subTreeEdge = {
                     group: 'edges',
                     data: {
@@ -270,32 +327,6 @@
         }
 
         return subTrees;
-    }
-
-    // Function positionSubTree
-    // Test first by migrating while loop from layout and preserving functionality.
-    // Then, use on each subTree in Mise en Place graph.
-    function positionSubTree(insertStep, position, stepRow, columnsInserted)
-    {
-        while(insertStep != null && insertStep.length > 0) {
-            //var initialRow = row;
-            //var initialColumn = columnsInserted;
-            var insertIngredients = getAdditionalIngredients(insertStep);
-            var rc = positionIngredients(insertIngredients, position, stepRow, columnsInserted, columnsInserted);
-            //row = rc.row;
-            columnsInserted = rc.column;
-            // positionIngredients(ingredients, position, row(by value), column(by value))
-                // Need to figure out weird column logic.
-            insertStep = getAdditionalSteps(insertStep);
-            if(insertStep != null && insertStep.length > 0) {
-                insertStep.position({x:position.x-125*columnsInserted, y:position.y+rowHeight*stepRow});
-                columnsInserted++;
-            }
-            // positionStep(step, position, row(by value), column(by value)).
-                // Need to figure out what happens in multiple steps case.
-        }
-        
-        return columnsInserted;
     }
 
     function removeSubtree(node, root, includeRoot)
@@ -419,6 +450,7 @@
     }
 
     var graphs = ['cy', 'cy3', 'cy2'];
+    var cys = [cy, cy3, cy2];
     var titles = ['Full Recipe', 'Mise en Place', 'A la Minute'];
     var currentGraphIndex = 0;
     function cycleGraph(increment)
@@ -435,6 +467,7 @@
             if(i == currentGraphIndex) {
                 currentGraph.style.display = 'block';
                 document.getElementById('title').innerHTML = '<h1>' + titles[i] + '</h1>';
+                document.getElementById('time').innerHTML = 'Total: ' + cys[i].scratch('time').total + ' min / Active: ' + cys[i].scratch('time').active + ' min'
             } else {
                 currentGraph.style.display = 'none';
             }
