@@ -30,7 +30,7 @@
     <button id='leftArrow' onclick='clickLeft()'>&lt-</button>
     <button id='rightArrow' style='float:right;' onclick='clickRight()'>-></button>
 <script>
-    var rowHeight = 90;
+    var rowHeight = 110;
 
     cytoscape('layout', 'timeline', function(layout) {
         console.log(layout.cy.nodes());
@@ -239,6 +239,7 @@
                 var newSubTreeRootData = newSubTreeRoot.data();
                 newSubTreeRootData.id = subTreeNode.data('id') + '-complete';
                 newSubTreeRootData.type = 'completion';
+                computeElementLabel(newSubTreeRootData);
 
                 var oldSubTreeRoot = elements.nodes[elements.nodes.length-1];
                 elements.nodes.push(newSubTreeRoot);

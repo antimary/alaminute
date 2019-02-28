@@ -483,10 +483,33 @@ var mushroomSaladElements =
     } },
 ];
 
+function computeLabel(elements) {
+    for(var element of elements) {
+        computeElementLabel(element.data);
+    }
+}
+
+function computeElementLabel(data)
+{
+    if(data.type == 'step') {
+        data.label =  data.name + '\n' + data.duration + ' min\n' + (data.active/data.duration*100).toFixed() + '% active';
+    } else if(data.type == 'ingredient') {
+        data.label = data.name;
+        if(data.amount > 0) {
+            data.label = data.amount + ' ' + data.unit + '\n' + data.label;
+        }
+    } else if(data.type = 'completion') {
+        data.label = data.name + ' Ready';
+    }
+}
+
+computeLabel(mushroomSaladElements);
+
 var styleObj = [ 
     { selector: 'node',
     style: {
-        label: 'data(name)',
+        'text-wrap': 'wrap',
+        label: 'data(label)',
         width: 100,
         height: 100,
         //'background-image': 'https://d2gg9evh47fn9z.cloudfront.net/800px_COLOURBOX31572236.jpg',
@@ -566,9 +589,21 @@ var styleObj = [
         'background-fit': 'cover',
         'background-clip': 'none',
     } },
+    { selector: '#wild-mushrooms-complete',
+    style: {
+        'background-image': 'mushrooms.png',
+        'background-fit': 'cover',
+        'background-clip': 'none',
+    } },
     { selector: '#shallot',
     style: {
         'background-color': 'white',
+        'background-image': 'shallot.png',
+        'background-fit': 'cover',
+        'background-clip': 'none',
+    } },
+    { selector: '#shallot-complete',
+    style: {
         'background-image': 'shallot.png',
         'background-fit': 'cover',
         'background-clip': 'none',
@@ -604,6 +639,12 @@ var styleObj = [
     { selector: '#baby-kale',
     style: {
         'background-color': 'white',
+        'background-image': 'kale.png',
+        'background-fit': 'cover',
+        'background-clip': 'none',
+    } },
+    { selector: '#baby-kale-complete',
+    style: {
         'background-image': 'kale.png',
         'background-fit': 'cover',
         'background-clip': 'none',
