@@ -146,8 +146,8 @@ var mushroomSaladElements =
         type: 'step',
         name: 'Wash',
         text: 'Wash mushrooms.',
-        duration: 5,
-        active: 5,
+        duration: 2,
+        active: 2,
         resource: ['sink', 'cutting-board', 'counter'],
         recipe: 'salad',
         order: 10,
@@ -159,7 +159,7 @@ var mushroomSaladElements =
         type: 'step',
         name: 'Dry',
         text: 'Wash and dry mushrooms. Trim of woody stems. Thinly slice.',
-        duration: 15,
+        duration: 10,
         active: 2,
         resource: ['sink', 'cutting-board', 'counter'],
         recipe: 'salad',
@@ -172,8 +172,8 @@ var mushroomSaladElements =
         type: 'step',
         name: 'Wash',
         text: 'Wash.',
-        duration: 5,
-        active: 5,
+        duration: 2,
+        active: 2,
         resource: ['sink', 'salad-spinner', 'counter'],
         recipe: 'salad',
         order: 12,
@@ -185,8 +185,8 @@ var mushroomSaladElements =
         type: 'step',
         name: 'Dry',
         text: 'Dry kale.',
-        duration: 15,
-        active: 3,
+        duration: 10,
+        active: 2,
         resource: ['sink', 'salad-spinner', 'counter'],
         recipe: 'salad',
         order: 12,
@@ -492,7 +492,7 @@ function computeLabel(elements) {
 function computeElementLabel(data)
 {
     if(data.type == 'step') {
-        data.label =  data.name + '\n' + data.duration + ' min\n' + (data.active/data.duration*100).toFixed() + '% active';
+        data.label =  data.name + '\n' + data.duration + ' min, ' + (data.active/data.duration*100).toFixed() + '% active';
     } else if(data.type == 'ingredient') {
         data.label = data.name;
         if(data.amount > 0) {

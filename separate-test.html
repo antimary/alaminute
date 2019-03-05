@@ -33,6 +33,7 @@
     <script src="mushroom-salad.js"></script>
 <script>
     var rowHeight = 110;
+    var columnWidth = 150;
     var totalTime = 0;
     var activeTime = 0;
     var previousNode = null;
@@ -73,7 +74,7 @@
             var stepRow = null;
             if(insertStep != null) {
                 stepRow = row;
-                insertStep.position({x:position.x-125*columnsInserted, y:position.y+rowHeight*row});
+                insertStep.position({x:position.x-columnWidth*columnsInserted, y:position.y+rowHeight*row});
                 updateTotalTime(insertStep);
                 row++;
                 columnsInserted++;
@@ -99,13 +100,13 @@
             var completionNodes = getCompletionNodes(rootNode);
             var newColumn = stepColumn;
             for(var i=completionNodes.length-1; i>=0; i--) {
-                completionNodes[i].position({x:position.x-125*stepColumn, y:position.y+rowHeight*(row+i-1)});
+                completionNodes[i].position({x:position.x-columnWidth*stepColumn, y:position.y+rowHeight*(row+i-1)});
                 newColumn++;
                 newColumn = positionSubTree(completionNodes[i], position, row+i-1, newColumn) - 1;
             }
             row += completionNodes.length;
 
-            position.x -= 125*columnsInserted;
+            position.x -= columnWidth*columnsInserted;
 
             // TODO : Support multiple critical paths.
             if(criticalNodes.length > 0) {
@@ -167,7 +168,7 @@
                 column++;
             }
             var additionalIngredient = additionalIngredients[i];
-            additionalIngredient.position({x: position.x-125*(column-1), y: position.y+rowHeight*row});
+            additionalIngredient.position({x: position.x-columnWidth*(column-1), y: position.y+rowHeight*row});
             row++;
         }
         return {row: row, column: column};
@@ -189,7 +190,7 @@
                 // Need to figure out weird column logic.
             insertStep = getAdditionalSteps(insertStep);
             if(insertStep != null && insertStep.length > 0) {
-                insertStep.position({x:position.x-125*columnsInserted, y:position.y+rowHeight*stepRow});
+                insertStep.position({x:position.x-columnWidth*columnsInserted, y:position.y+rowHeight*stepRow});
                 updateTotalTime(insertStep);
                 columnsInserted++;
             }
