@@ -1,0 +1,34 @@
+{
+    "name": "Chicken Kara-age",
+    "nickname": "kara",
+    "type": "recipe",
+    "components": [
+        {
+            "name": "marinade"
+        },
+        {
+            "name": "green-onion-sauce"
+        },
+        {
+            "name": "chicken"
+        }
+    ],
+    "slots": [
+        {   
+            "name": "thighs-thaw",
+            "text": "transfer-thighs->fridge"
+        },
+        {
+            "name": "marinate",
+            "text": "soy/sake/ginger/thighs"
+        },
+        {
+            "name": "mise",
+            "text": "marinade-add-soy / mise-oil/thermo/starch / mise-vin/soy/scall/sug/ses/gin"
+        },
+        {
+            "name": "cook",
+            "text": "drain-coat-chicken / fry-chicken / toss-sauce / combine"
+        }
+    ]
+}

@@ -1,0 +1,28 @@
+<html>
+<head>
+    <title>a la minute calendar</title>
+    <meta charset="utf-8" />
+</head>
+<body><center>
+    <img src="alm.png" />
+
+    <!--Add buttons to initiate auth sequence and sign out-->
+    <button id="authorize_button" style="display: none;">Authorize</button>
+    <button id="signout_button" style="display: none;">Sign Out</button>
+
+    <pre id="content" style="white-space: pre-wrap;"></pre>
+
+    <script type="module" src="dist/main.js"></script>
+
+    <button id="month">month</button>
+    <button id="prep">prep</button>
+    <div id="calendar" style="height: 800px;"></div>
+</center></body>
+</html>
+
+<script src="src/gcal.js"></script>
+
+<script async defer src="https://apis.google.com/js/api.js"
+    onload="this.onload=function(){};handleClientLoad()"
+    onreadystatechange="if (this.readyState === 'complete') this.onload()">
+</script>
