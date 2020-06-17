@@ -4,8 +4,6 @@ export class RecipeList {
     constructor (id, slots) {
         this.recipeList = document.getElementById(id);
         this.createRecipeList(this.recipeList, slots);
-        console.log('recipe-list');
-        console.log(this.recipeList);
     }
 
     createRecipeList (parent, slots) {
@@ -38,12 +36,8 @@ export class RecipeList {
         // Create recipe title node (float-text)
         element.appendChild(document.createTextNode(recipeGraph.title));
         // Create click handler (open-recipe-view)
-        console.log('recipe-list-2');
-        console.log(this.recipeList);
         let recipeList = this.recipeList;
         element.addEventListener('click', function () {
-            console.log('recipe-list-3');
-            console.log(recipeList);
             recipeList.dispatchEvent(new CustomEvent('click-recipe-list', {
                 detail: recipeGraph,
             }));

@@ -43506,8 +43506,8 @@ recipes_graph.nodeDatas = {
         'green-onion', 5, 5, 2*60,
         '4 T finely chopped green onion',
     ),
-    'sugar': createNodeData(
-        'sugar', 1, 1, Infinity,
+    'kara-sugar': createNodeData(
+        'kara-sugar', 1, 1, Infinity,
         'Pinch sugar',
     ),
     'sesame-oil': createNodeData(
@@ -43550,10 +43550,10 @@ addStep(recipes_graph, 'fry-chicken', 'coat-chicken', 'heat-oil');
 addIngredient(recipes_graph, 'rice-vinegar');
 addIngredient(recipes_graph, 'sauce-soy');
 addIngredient(recipes_graph, 'green-onion');
-addIngredient(recipes_graph, 'sugar');
+addIngredient(recipes_graph, 'kara-sugar');
 addIngredient(recipes_graph, 'sesame-oil');
 addIngredient(recipes_graph, 'sauce-ginger');
-addStep(recipes_graph, 'sauce', 'rice-vinegar', 'sauce-soy', 'green-onion', 'sugar', 'sesame-oil', 'sauce-ginger');
+addStep(recipes_graph, 'sauce', 'rice-vinegar', 'sauce-soy', 'green-onion', 'kara-sugar', 'sesame-oil', 'sauce-ginger');
 addProduct(recipes_graph, 'toss', 'fry-chicken', 'sauce');
 
 
@@ -43617,12 +43617,12 @@ recipes_graph.nodeDatas = {
         'ses-1', 1, 1, Infinity,
         '1 t white sesame seeds, toasted',
     ),
-    'sugar': createNodeData(
-        'sugar', 1, 1, Infinity,
+    'spin-sugar': createNodeData(
+        'spin-sugar', 1, 1, Infinity,
         '1 t sugar',
     ),
-    'soy': createNodeData(
-        'soy', 1, 1, Infinity,
+    'spin-soy': createNodeData(
+        'spin-soy', 1, 1, Infinity,
         '1/2 T soy sauce',
     ),
     'ses-2': createNodeData(
@@ -43653,12 +43653,12 @@ recipes_graph.addNode('finish');
 addIngredient(recipes_graph, 'spinach');
 addIngredient(recipes_graph, 'tahini');
 addIngredient(recipes_graph, 'ses-1');
-addIngredient(recipes_graph, 'sugar');
-addIngredient(recipes_graph, 'soy');
+addIngredient(recipes_graph, 'spin-sugar');
+addIngredient(recipes_graph, 'spin-soy');
 addIngredient(recipes_graph, 'ses-2');
 addIngredient(recipes_graph, 'boil-pot');
 addStep(recipes_graph, 'cook-spin', 'boil-pot', 'spinach');
-addStep(recipes_graph, 'mix-spin', 'cook-spin', 'tahini', 'ses-1', 'sugar', 'soy');
+addStep(recipes_graph, 'mix-spin', 'cook-spin', 'tahini', 'ses-1', 'spin-sugar', 'spin-soy');
 addProduct(recipes_graph, 'serve-spin', 'mix-spin', 'ses-2');
 
 
@@ -43701,13 +43701,7 @@ addIngredient(recipes_graph, 'salt');
 addStep(recipes_graph, 'cook-pepp', 'pepp', 'dashi', 'salt');
 addProduct(recipes_graph, 'serve-pepp', 'cook-pepp');
 
-
-// ********************************
-// Recipe post-processing
-// ********************************
-for (let recipeName in recipes) {
-    let graph = recipes[recipeName];
-
+function computeCriticalSort(graph) {
     // Calculate critical path for recipe graph
     var criticalPathObj = graph.criticalPath();
     var criticalPath = criticalPathObj.path;
@@ -43723,7 +43717,7 @@ for (let recipeName in recipes) {
     var distances = graph.distanceFromPath(criticalPath, 'start');
 
     // Set a function on the graph to sort nodes in order of increasing critical distance
-    graph.criticalSort = function (nodes) {
+    var criticalSort = function (nodes) {
         let result = [];
         for (let i=0; i<nodes.length; i++) {
             let dist = distances[nodes[i]];
@@ -43735,21 +43729,70 @@ for (let recipeName in recipes) {
         }
         return result;
     }
+    return criticalSort;
+}
+
+// ********************************
+// Recipe post-processing
+// ********************************
+for (let recipeName in recipes) {
+    let graph = recipes[recipeName];
+
+    graph.criticalSort = computeCriticalSort(graph);
 }
 // CONCATENATED MODULE: ./src/modules/graphs.js
 
 
+
 var graphs = recipes;
+createMealGraph(Object.keys(graphs));
 
-// graph.addNode('chicken-karaage', {
-//     'steps' : [
-//         {'node' : 'marinated-chicken-for-karaage'},
-//         {'step' : 'drain marinate, coat in cornstarch'},
-//         {'step' : 'heat-oil, fry chicken, turn, drain on paper towels'},
-//     ],
-// });
+function createMealGraph (recipeNames) {
+    let mealGraph = new graph_data_structure_default.a();
+    mealGraph.addNode('start');
+    mealGraph.addNode('finish');
+    mealGraph.nodeDatas = {};
+    mealGraph.title = 'Karaage Bento';
+    mealGraph.img = './assets/Karaage-Bento-500x400.jpg';
 
+    let mealName = '';
+    for (let i=0; i<recipeNames.length; i++) {
+        // Accumulate meal name from recipe names
+        let recipeName = recipeNames[i];
+        if (mealName != '') {
+            mealName += '/';
+        }
+        mealName += recipeName;
 
+        // Add recipe nodes to meal graph (except start / finish)
+        let recipeGraph = graphs[recipeName];
+        let nodes = recipeGraph.nodes();
+        for (let j=0; j<nodes.length; j++) {
+            let node = nodes[j];
+            if (node != 'start' && node != 'finish') {
+                mealGraph.addNode(node);
+                mealGraph.nodeDatas[node] = recipeGraph.nodeDatas[node];
+            }
+        }
+
+        // Add recipe edges to meal graph (connecting back to meal start/finish above)
+        for (let j=0; j<nodes.length; j++) {
+            let node = nodes[j];
+            let adjacent = recipeGraph.adjacent(node);
+            for (let k=0; k<adjacent.length; k++) {
+                let adjNode = adjacent[k];
+                let weight = recipeGraph.getEdgeWeight(node, adjNode);
+                mealGraph.addEdge(node, adjNode, weight);
+            }
+        }
+    }
+
+    // Compute critical sort on completed graph
+    mealGraph.criticalSort = computeCriticalSort(mealGraph);
+
+    // Add to graphs (key=accum-recipe-name)
+    graphs[mealName] = mealGraph;
+}
 // CONCATENATED MODULE: ./src/modules/slots.js
 
 
@@ -44082,8 +44125,6 @@ class RecipeList {
     constructor (id, slots) {
         this.recipeList = document.getElementById(id);
         this.createRecipeList(this.recipeList, slots);
-        console.log('recipe-list');
-        console.log(this.recipeList);
     }
 
     createRecipeList (parent, slots) {
@@ -44116,12 +44157,8 @@ class RecipeList {
         // Create recipe title node (float-text)
         element.appendChild(document.createTextNode(recipeGraph.title));
         // Create click handler (open-recipe-view)
-        console.log('recipe-list-2');
-        console.log(this.recipeList);
         let recipeList = this.recipeList;
         element.addEventListener('click', function () {
-            console.log('recipe-list-3');
-            console.log(recipeList);
             recipeList.dispatchEvent(new CustomEvent('click-recipe-list', {
                 detail: recipeGraph,
             }));

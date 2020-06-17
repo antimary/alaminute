@@ -107,8 +107,8 @@ graph.nodeDatas = {
         'green-onion', 5, 5, 2*60,
         '4 T finely chopped green onion',
     ),
-    'sugar': createNodeData(
-        'sugar', 1, 1, Infinity,
+    'kara-sugar': createNodeData(
+        'kara-sugar', 1, 1, Infinity,
         'Pinch sugar',
     ),
     'sesame-oil': createNodeData(
@@ -151,10 +151,10 @@ addStep(graph, 'fry-chicken', 'coat-chicken', 'heat-oil');
 addIngredient(graph, 'rice-vinegar');
 addIngredient(graph, 'sauce-soy');
 addIngredient(graph, 'green-onion');
-addIngredient(graph, 'sugar');
+addIngredient(graph, 'kara-sugar');
 addIngredient(graph, 'sesame-oil');
 addIngredient(graph, 'sauce-ginger');
-addStep(graph, 'sauce', 'rice-vinegar', 'sauce-soy', 'green-onion', 'sugar', 'sesame-oil', 'sauce-ginger');
+addStep(graph, 'sauce', 'rice-vinegar', 'sauce-soy', 'green-onion', 'kara-sugar', 'sesame-oil', 'sauce-ginger');
 addProduct(graph, 'toss', 'fry-chicken', 'sauce');
 
 
@@ -218,12 +218,12 @@ graph.nodeDatas = {
         'ses-1', 1, 1, Infinity,
         '1 t white sesame seeds, toasted',
     ),
-    'sugar': createNodeData(
-        'sugar', 1, 1, Infinity,
+    'spin-sugar': createNodeData(
+        'spin-sugar', 1, 1, Infinity,
         '1 t sugar',
     ),
-    'soy': createNodeData(
-        'soy', 1, 1, Infinity,
+    'spin-soy': createNodeData(
+        'spin-soy', 1, 1, Infinity,
         '1/2 T soy sauce',
     ),
     'ses-2': createNodeData(
@@ -254,12 +254,12 @@ graph.addNode('finish');
 addIngredient(graph, 'spinach');
 addIngredient(graph, 'tahini');
 addIngredient(graph, 'ses-1');
-addIngredient(graph, 'sugar');
-addIngredient(graph, 'soy');
+addIngredient(graph, 'spin-sugar');
+addIngredient(graph, 'spin-soy');
 addIngredient(graph, 'ses-2');
 addIngredient(graph, 'boil-pot');
 addStep(graph, 'cook-spin', 'boil-pot', 'spinach');
-addStep(graph, 'mix-spin', 'cook-spin', 'tahini', 'ses-1', 'sugar', 'soy');
+addStep(graph, 'mix-spin', 'cook-spin', 'tahini', 'ses-1', 'spin-sugar', 'spin-soy');
 addProduct(graph, 'serve-spin', 'mix-spin', 'ses-2');
 
 
@@ -302,13 +302,7 @@ addIngredient(graph, 'salt');
 addStep(graph, 'cook-pepp', 'pepp', 'dashi', 'salt');
 addProduct(graph, 'serve-pepp', 'cook-pepp');
 
-
-// ********************************
-// Recipe post-processing
-// ********************************
-for (let recipeName in recipes) {
-    let graph = recipes[recipeName];
-
+export function computeCriticalSort(graph) {
     // Calculate critical path for recipe graph
     var criticalPathObj = graph.criticalPath();
     var criticalPath = criticalPathObj.path;
@@ -324,7 +318,7 @@ for (let recipeName in recipes) {
     var distances = graph.distanceFromPath(criticalPath, 'start');
 
     // Set a function on the graph to sort nodes in order of increasing critical distance
-    graph.criticalSort = function (nodes) {
+    var criticalSort = function (nodes) {
         let result = [];
         for (let i=0; i<nodes.length; i++) {
             let dist = distances[nodes[i]];
@@ -336,4 +330,14 @@ for (let recipeName in recipes) {
         }
         return result;
     }
+    return criticalSort;
+}
+
+// ********************************
+// Recipe post-processing
+// ********************************
+for (let recipeName in recipes) {
+    let graph = recipes[recipeName];
+
+    graph.criticalSort = computeCriticalSort(graph);
 }
