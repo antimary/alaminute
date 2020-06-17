@@ -3,25 +3,35 @@
     <title>a la minute calendar</title>
     <meta charset="utf-8" />
 </head>
-<body><center>
-    <img src="alm.png" />
-
-    <!--Add buttons to initiate auth sequence and sign out-->
-    <button id="authorize_button" style="display: none;">Authorize</button>
-    <button id="signout_button" style="display: none;">Sign Out</button>
-
-    <pre id="content" style="white-space: pre-wrap;"></pre>
-
-    <script type="module" src="dist/main.js"></script>
-
-    <button id="month">month</button>
-    <button id="prep">prep</button>
-    <div id="calendar" style="height: 800px;"></div>
-</center></body>
+<body>
+    <div id='page-container' style='text-align:center'>
+        <div id='page-header'>
+            <img src='alm.png' />
+        </div>
+        <div id='top-nav'>
+            <pre id="content" style="white-space: pre-wrap;"></pre>
+        </div>
+        <div id='main-content'>
+            <div id='recipe-list'></div>
+            <div id='calendar-container'>
+                <div id='calendar-nav'>
+                    <button id='month'>month</button>
+                    <button id='prep'>prep</button>
+                </div>
+                <div id='calendar' style='height: 800px;'></div>
+            </div>
+        </div>
+        <div id='bottom-nav' style='display:inline-block'>
+            <!--Add buttons to initiate auth sequence and sign out-->
+            <button id="authorize_button" style="display: none;">Authorize</button>
+            <button id="signout_button" style="display: none;">Sign Out</button>
+        </div>
+    </div>
+</body>
 </html>
 
+<script type="module" src="dist/main.js"></script>
 <script src="src/gcal.js"></script>
-
 <script async defer src="https://apis.google.com/js/api.js"
     onload="this.onload=function(){};handleClientLoad()"
     onreadystatechange="if (this.readyState === 'complete') this.onload()">

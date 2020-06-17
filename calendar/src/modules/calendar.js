@@ -1,6 +1,9 @@
 import Calendar from '../../../tui.calendar'; /* ES6 */
 import "../../../tui.calendar/dist/tui-calendar.css";
 
+import { showRecipeView } from './recipe-view.js';
+import { slots } from './slots.js';
+
 // If you use the default popups, use this.
 import '../../../tui.calendar/node_modules/tui-date-picker/dist/tui-date-picker.css';
 import '../../../tui.calendar/node_modules/tui-time-picker/dist/tui-time-picker.css';
@@ -19,10 +22,7 @@ export var calendar = new Calendar('#calendar', {
 });
 
 calendar.setDate(startDate);
-console.log ('startDate');
-console.log (startDate);
-console.log ('endDate');
-console.log (endDate);
+
 calendar.setCalendarColor('2', {    // meals
     color: '#282828',
     bgColor: '#dc9656',
@@ -36,6 +36,14 @@ calendar.setCalendarColor('errand', {  // errands
     bgColor: '#ffcccb',
 });
 calendar.setCalendarColor('busy', {bgColor: '#d3d3d3'});
+
+calendar.on('clickSchedule', function(event) {
+    var schedule = event.schedule;
+    document.getElementById('calendar').style.display = 'none';
+
+    showRecipeView(slots[schedule.id].graph);
+    //alert(`clicked schedule ${schedule.id}`);
+});
 
 window.addEventListener('gcal-loaded', function (e) {
     let upcomingEvents = e.detail.upcomingEvents;
@@ -140,7 +148,7 @@ calendar.createSchedules([
         isReadOnly: true    // schedule is read-only
     },
     {
-        id: '9',
+        id: 'karaage',
         calendarId: '2',
         title: 'Lunch (karaage / rice-peas-pepp / spin)',
         category: 'time',
