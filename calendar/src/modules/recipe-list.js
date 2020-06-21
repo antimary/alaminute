@@ -1,14 +1,14 @@
 import { showRecipeView } from './recipe-view.js';
 
 export class RecipeList {
-    constructor (id, slots) {
+    constructor (id, slotsMap) {
         this.recipeList = document.getElementById(id);
-        this.createRecipeList(this.recipeList, slots);
+        this.createRecipeList(this.recipeList, slotsMap);
         console.log('recipe-list');
         console.log(this.recipeList);
     }
 
-    createRecipeList (parent, slots) {
+    createRecipeList (parent, slotsMap) {
         parent.style.display = 'inline-block';
         // Create recipes header
         let header = parent.appendChild(document.createElement('div'));
@@ -16,14 +16,14 @@ export class RecipeList {
         header.style.fontSize = '2.5vw';
         header.appendChild(document.createTextNode('Recipes'));
         // Create recipe cards
-        let graphs = slots.getGraphs();
-        for (let graphName in graphs) {
-            this.createRecipeElement(parent, graphs[graphName]);
+        for (let graphName in slotsMap) {
+            this.createRecipeElement(parent, slotsMap[graphName]);
         }
     }
 
-    createRecipeElement (parent, recipeGraph) {
+    createRecipeElement (parent, slots) {
         let element = parent.appendChild(document.createElement('div'));
+        let recipeGraph = slots.graph;
         element.style.fontSize = '1.5vw';
         element.style.width = '500px';
         element.style.height = '60px';
@@ -45,7 +45,7 @@ export class RecipeList {
             console.log('recipe-list-3');
             console.log(recipeList);
             recipeList.dispatchEvent(new CustomEvent('click-recipe-list', {
-                detail: recipeGraph,
+                detail: slots,
             }));
             // document.getElementById('calendar').style.display = 'none';
             // showRecipeView(recipeGraph);

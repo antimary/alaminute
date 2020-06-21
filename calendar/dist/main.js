@@ -244,7 +244,6 @@ function Graph(serialized) {
         function DFSVisit(node) {
             if (!visited[node]) {
                 visited[node] = true;
-                console.log(prioritySort(adjacent(node)));
                 prioritySort(adjacent(node)).forEach(DFSVisit);
                 nodeList.push(node);
             }
@@ -43365,7 +43364,7 @@ var dist_tui_calendar = __webpack_require__(7);
 
 // CONCATENATED MODULE: ./src/modules/recipe-view.js
 
-function showRecipeView (graph) {
+function showRecipeView (slots) {
     var mainContent = document.getElementById('main-content');
     var recipeView = Object.assign(mainContent.appendChild(document.createElement('div')), {
         id: 'recipe-view',
@@ -43377,7 +43376,7 @@ function showRecipeView (graph) {
     });
     var recipeImage = Object.assign(recipeHeader.appendChild(document.createElement('img')), {
         id: 'recipe-image',
-        src: graph.img,
+        src: slots.graph.img,
     });
     recipeImage.style.width = '100px';
     // {
@@ -43390,7 +43389,33 @@ function showRecipeView (graph) {
     });
     recipeTitle.style.display = 'inline-block';
     console.log(recipeTitle);
-    recipeTitle.appendChild(document.createTextNode(graph.title));
+    recipeTitle.appendChild(document.createTextNode(slots.graph.title));
+
+    showSlots(slots, recipeView);
+}
+
+function showSlot(slot, parent, index) {
+    var slotView = Object.assign(parent.appendChild(document.createElement('div')), {
+        id: 'slot-' + slot.graphName + '-' + index,
+    });
+    slotView.style.textAlign = 'left';
+    slotView.style.margin = '25px';
+    slotView.appendChild(document.createElement('div')).appendChild(document.createTextNode('Time: ' + slot.time));
+    for (let i=0; i<slot.steps.length; i++) {
+        slotView.appendChild(document.createElement('div')).appendChild(document.createTextNode(slot.steps[i].instructions));
+    }
+}
+
+function showSlots(slots, parent) {
+    for (let i=0; i<slots.slots.length; i++) {
+        showSlot(slots.slots[i], parent, i);
+    }
+}
+
+function hideRecipeView () {
+    var mainContent = document.getElementById('main-content');
+    var recipeView = document.getElementById('recipe-view');
+    mainContent.removeChild(recipeView);
 }
 // EXTERNAL MODULE: ../graph-data-structure/index.js
 var graph_data_structure = __webpack_require__(0);
@@ -43739,6 +43764,7 @@ for (let recipeName in recipes) {
 // CONCATENATED MODULE: ./src/modules/graphs.js
 
 
+
 var graphs = recipes;
 
 // graph.addNode('chicken-karaage', {
@@ -43753,10 +43779,7 @@ var graphs = recipes;
 // CONCATENATED MODULE: ./src/modules/slots.js
 
 
-var slots = {};
-slots.getGraphs = function () {
-    return graphs;
-}
+var slotsMap = {};
 
 function fillSlot (graph, order, maxTime, type) {
     let totalTime = 0;
@@ -43797,25 +43820,30 @@ for (let graphName in graphs) {
     let order = graph.topologicalSort(['start'], undefined, graph.criticalSort);
     console.log(order);
 
+    let slots = [];
     let slot = fillSlot(graph, order, 25, 'step');
+    slots.unshift(slot);
     let remainingSteps = slot.remaining;
     printSlot(slot);
     slot = fillSlot(graph, order, 15, 'ingredient');
+    slots.unshift(slot);
     let remainingIngredients = slot.remaining;
     printSlot(slot);
 
     slot = fillSlot(graph, remainingSteps, 25, 'step');
+    slots.unshift(slot);
     printSlot(slot);
     slot = fillSlot(graph, remainingIngredients, 15, 'ingredient');
+    slots.unshift(slot);
     printSlot(slot);
 
     console.log(remainingSteps);
     console.log(remainingIngredients);
 
-    slots[graphName] = {
+    slotsMap[graphName] = {
+        graphName: graphName,
         graph: graph,
-        steps: slot.steps,
-        time: slot.time,
+        slots: slots,
     };
 }
 // EXTERNAL MODULE: ../tui.calendar/node_modules/tui-date-picker/dist/tui-date-picker.css
@@ -43868,7 +43896,7 @@ calendar.on('clickSchedule', function(event) {
     var schedule = event.schedule;
     document.getElementById('calendar').style.display = 'none';
 
-    showRecipeView(slots[schedule.id].graph);
+    showRecipeView(slotsMap[schedule.id].graph);
     //alert(`clicked schedule ${schedule.id}`);
 });
 
@@ -44079,14 +44107,14 @@ calendar.createSchedules([
 
 
 class RecipeList {
-    constructor (id, slots) {
+    constructor (id, slotsMap) {
         this.recipeList = document.getElementById(id);
-        this.createRecipeList(this.recipeList, slots);
+        this.createRecipeList(this.recipeList, slotsMap);
         console.log('recipe-list');
         console.log(this.recipeList);
     }
 
-    createRecipeList (parent, slots) {
+    createRecipeList (parent, slotsMap) {
         parent.style.display = 'inline-block';
         // Create recipes header
         let header = parent.appendChild(document.createElement('div'));
@@ -44094,14 +44122,14 @@ class RecipeList {
         header.style.fontSize = '2.5vw';
         header.appendChild(document.createTextNode('Recipes'));
         // Create recipe cards
-        let graphs = slots.getGraphs();
-        for (let graphName in graphs) {
-            this.createRecipeElement(parent, graphs[graphName]);
+        for (let graphName in slotsMap) {
+            this.createRecipeElement(parent, slotsMap[graphName]);
         }
     }
 
-    createRecipeElement (parent, recipeGraph) {
+    createRecipeElement (parent, slots) {
         let element = parent.appendChild(document.createElement('div'));
+        let recipeGraph = slots.graph;
         element.style.fontSize = '1.5vw';
         element.style.width = '500px';
         element.style.height = '60px';
@@ -44123,7 +44151,7 @@ class RecipeList {
             console.log('recipe-list-3');
             console.log(recipeList);
             recipeList.dispatchEvent(new CustomEvent('click-recipe-list', {
-                detail: recipeGraph,
+                detail: slots,
             }));
             // document.getElementById('calendar').style.display = 'none';
             // showRecipeView(recipeGraph);
@@ -44131,6 +44159,7 @@ class RecipeList {
     }
 }
 // CONCATENATED MODULE: ./src/index.js
+
 
 
 
@@ -44143,13 +44172,25 @@ document.querySelector('#prep').addEventListener('click', function () {
     calendar.changeView('week', true);
 });
 
-let recipeList = new RecipeList('recipe-list', slots);
+let recipeList = new RecipeList('recipe-list', slotsMap);
 recipeList.recipeList.addEventListener('click-recipe-list', function (event) {
-    let recipeGraph = event.detail;
+    let slot = event.detail;
     console.log('click-recipe-list');
-    console.log(recipeGraph);
+    console.log(slot);
+
+    let calendarContainer = document.getElementById('calendar-container');
+    if (calendarContainer.style.display == 'none') {
+        calendarContainer.style.display = 'block';
+        hideRecipeView();
+    } else {
+        calendarContainer.style.display = 'none';
+        showRecipeView(slot);
+    }
+
+    //let recipeViewContainer = Object.assign(document.createElement('div'), { 'id': 'recipe-view-container' });
+    
 });
-console.log(slots);
+console.log(slotsMap);
 console.log(recipeList);
 
 /***/ })

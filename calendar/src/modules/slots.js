@@ -1,9 +1,6 @@
 import { graphs } from './graphs.js';
 
-export var slots = {};
-slots.getGraphs = function () {
-    return graphs;
-}
+export var slotsMap = {};
 
 function fillSlot (graph, order, maxTime, type) {
     let totalTime = 0;
@@ -44,24 +41,29 @@ for (let graphName in graphs) {
     let order = graph.topologicalSort(['start'], undefined, graph.criticalSort);
     console.log(order);
 
+    let slots = [];
     let slot = fillSlot(graph, order, 25, 'step');
+    slots.unshift(slot);
     let remainingSteps = slot.remaining;
     printSlot(slot);
     slot = fillSlot(graph, order, 15, 'ingredient');
+    slots.unshift(slot);
     let remainingIngredients = slot.remaining;
     printSlot(slot);
 
     slot = fillSlot(graph, remainingSteps, 25, 'step');
+    slots.unshift(slot);
     printSlot(slot);
     slot = fillSlot(graph, remainingIngredients, 15, 'ingredient');
+    slots.unshift(slot);
     printSlot(slot);
 
     console.log(remainingSteps);
     console.log(remainingIngredients);
 
-    slots[graphName] = {
+    slotsMap[graphName] = {
+        graphName: graphName,
         graph: graph,
-        steps: slot.steps,
-        time: slot.time,
+        slots: slots,
     };
 }
