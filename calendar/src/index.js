@@ -17,4 +17,3 @@ recipeList.recipeList.addEventListener('click-recipe-list', function (event) {
     console.log(recipeGraph);
 });
 console.log(slots);
-console.log(recipeList);

@@ -244,7 +244,6 @@ function Graph(serialized) {
         function DFSVisit(node) {
             if (!visited[node]) {
                 visited[node] = true;
-                console.log(prioritySort(adjacent(node)));
                 prioritySort(adjacent(node)).forEach(DFSVisit);
                 nodeList.push(node);
             }
@@ -43438,6 +43437,18 @@ function addWeightedEdge (graph, a, b) {
     return graph.addEdge(a, b, graph.nodeDatas[a].minTime);
 }
 
+function addType (graph, nodeName, type) {
+    if (graph.nodeDatas[nodeName].type) {
+        graph.nodeDatas[nodeName].type += '-';
+    }
+    graph.nodeDatas[nodeName].type += type;
+}
+
+function addFinish(graph) {
+    graph.nodeDatas['finish'] = createNodeData('finish', 2, 2, 5, 'Serve');
+    addType(graph, 'finish', 'step');
+}
+
 // ********************************
 // Karaage graph
 // ********************************
@@ -43526,7 +43537,7 @@ recipes_graph.nodeDatas = {
     'toss': createNodeData(
         'toss', 2, 2, 5,
         'Put the chicken pieces in the pan and toss to coat each piece with the sauce',
-    ),
+    )
 };
 
 recipes_graph.addNode('start');
@@ -43545,6 +43556,7 @@ addStep(recipes_graph, 'coat-chicken', 'marinate-chicken', 'cornstarch');
 
 addIngredient(recipes_graph, 'vegetable-oil');
 addStep(recipes_graph, 'heat-oil', 'vegetable-oil');
+addType(recipes_graph, 'heat-oil', 'ingredient');
 addStep(recipes_graph, 'fry-chicken', 'coat-chicken', 'heat-oil');
 
 addIngredient(recipes_graph, 'rice-vinegar');
@@ -43593,6 +43605,7 @@ recipes_graph.addNode('finish');
 addIngredient(recipes_graph, 'frz-peas');
 addIngredient(recipes_graph, 'rice');
 addStep(recipes_graph, 'set-rice', 'rice');
+addType(recipes_graph, 'set-rice', 'ingredient');
 addStep(recipes_graph, 'cook-peas', 'frz-peas');
 addProduct(recipes_graph, 'mix-rice', 'set-rice', 'cook-peas');
 
@@ -43787,6 +43800,9 @@ function createMealGraph (recipeNames) {
         }
     }
 
+    // Add node data and type to finish to allow multiple incoming edges
+    addFinish(mealGraph);
+
     // Compute critical sort on completed graph
     mealGraph.criticalSort = computeCriticalSort(mealGraph);
 
@@ -43797,11 +43813,16 @@ function createMealGraph (recipeNames) {
 
 
 var slots = {};
+
+var stepTimes = {};
+var accumSteps = [];
+
 slots.getGraphs = function () {
     return graphs;
 }
 
-function fillSlot (graph, order, maxTime, type) {
+// Fill slot using activeTime as a proxy for step times.
+function fillSlot1 (graph, order, maxTime, type) {
     let totalTime = 0;
     let steps = [];
     for (var i=order.length-1; i>=0; i--) {
@@ -43820,6 +43841,81 @@ function fillSlot (graph, order, maxTime, type) {
     return { steps: steps, time: totalTime, remaining: order.slice(0, i)};
 }
 
+// Fill slot with accurate step times, accounting for edges, minTime, and activeTime.
+function fillSlot2 (graph, order, maxTime, type) {
+    let totalTime = 0;
+    let steps = [];
+    let remaining = order.slice();
+
+    // Traverse topological sort in reverse
+    for (var i=order.length-1; i>=0; i--) {
+        let node = order[i];
+        let nodeData = graph.nodeDatas[node];
+        if (!nodeData || !nodeData.type) { continue; }
+
+        if (!type || nodeData.type.includes(type)) {
+            let nodeTime = 0;
+            if (steps.length == 0) {
+                // Always use activeTime for the first (last) step
+                nodeTime = nodeData.activeTime;
+            } else {
+                // Add minTime to the time stored in neigboring step for all other steps
+                let edges = [];
+                let allSteps = steps.concat(accumSteps);
+                for (let j=allSteps.length-1; j>=0; j--) {
+                    let stepNode = allSteps[j].name;
+                    if (graph.adjacent(node).includes(stepNode)) {
+                        edges.push(stepNode);
+                        nodeTime = graph.getEdgeWeight(node, stepNode) + stepTimes[stepNode];
+                    }
+                }
+
+                if (edges.length != 1) {
+                    console.log(node);
+                    console.log(graph.adjacent(node));
+                    console.log(edges);
+                    throw 'Invalid graph: recipe nodes should always have 1 outgoing edge';
+                }
+                
+                //nodeTime = edgeTime;
+            }
+
+            let newTime = Math.max(totalTime, nodeTime);
+            if (newTime > maxTime) {
+                i++;
+                break;
+            }
+            totalTime = newTime;
+            steps.unshift(nodeData);
+            stepTimes[node] = nodeTime;
+            remaining.splice(i, 1);
+        }
+    }
+
+    accumSteps = steps.concat(accumSteps);
+
+    return { steps: steps, time: totalTime, remaining: remaining };
+}
+
+// TODO : rice-peas-ingredients-pass skips cook-peas / frz-peas crashes because cook-peas-neighbor not in accumSteps -- replace-ingredient-pass with all-pass
+
+// TODO : Why does second run through fill have 21 still?
+// TODO : You need to individually splice out nodes now that you're mixing steps / ingredients
+
+// TODO : Print karaage-coat-adjacent after creation (adjacent-to-2-selves?)
+// TODO : Reduce alm slot 30 -> 25 / check heat-oil
+
+// TODO : Fix rice-peas frz-peas->cook-peas edge / cook-peas-not-added->alm-slot??
+    // ISSUE : set-rice is a step that got bumped to the ingredient slot (same as heat-oil)
+// TODO : End-of-fillSlot -> slot-start-time
+// TODO : Beg-of-fillSlot -> slot-min/max-spacing
+// TODO : Fix heat-oil max-30
+// TODO : Initial-print -> recipe-view
+
+function fillSlot (graph, order, maxTime, type) {
+    return fillSlot2(graph, order, maxTime, type);
+}
+
 function printSlot (slot) {
     let steps = slot.steps;
     console.log("Time: " + slot.time);
@@ -43830,30 +43926,31 @@ function printSlot (slot) {
 }
 
 for (let graphName in graphs) {
+    stepTimes = {};
+    accumSteps = [];
+
     console.log('graphName');
     console.log(graphName);
     let graph = graphs[graphName];
-    console.log(graph);
 
-    console.log("order");
-    console.log(graph.criticalSort);
     let order = graph.topologicalSort(['start'], undefined, graph.criticalSort);
+    console.log("order");
     console.log(order);
 
-    let slot = fillSlot(graph, order, 25, 'step');
-    let remainingSteps = slot.remaining;
+    let slot = fillSlot(graph, order, 30, 'step');
+    let remaining = slot.remaining;
     printSlot(slot);
-    slot = fillSlot(graph, order, 15, 'ingredient');
-    let remainingIngredients = slot.remaining;
-    printSlot(slot);
-
-    slot = fillSlot(graph, remainingSteps, 25, 'step');
-    printSlot(slot);
-    slot = fillSlot(graph, remainingIngredients, 15, 'ingredient');
+    slot = fillSlot(graph, remaining, 15);
+    remaining = slot.remaining;
     printSlot(slot);
 
-    console.log(remainingSteps);
-    console.log(remainingIngredients);
+    slot = fillSlot(graph, remaining, 25, 'step');
+    printSlot(slot);
+    slot = fillSlot(graph, remaining, 15);
+    printSlot(slot);
+
+    console.log('remaining');
+    console.log(remaining);
 
     slots[graphName] = {
         graph: graph,
@@ -44187,7 +44284,6 @@ recipeList.recipeList.addEventListener('click-recipe-list', function (event) {
     console.log(recipeGraph);
 });
 console.log(slots);
-console.log(recipeList);
 
 /***/ })
 /******/ ]);

@@ -1,4 +1,4 @@
-import { recipes, computeCriticalSort } from './recipes.js';
+import { recipes, computeCriticalSort, addFinish } from './recipes.js';
 import Graph from '../../../graph-data-structure/index.js';
 
 export var graphs = recipes;
@@ -43,6 +43,9 @@ function createMealGraph (recipeNames) {
             }
         }
     }
+
+    // Add node data and type to finish to allow multiple incoming edges
+    addFinish(mealGraph);
 
     // Compute critical sort on completed graph
     mealGraph.criticalSort = computeCriticalSort(mealGraph);

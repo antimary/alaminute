@@ -39,6 +39,18 @@ function addWeightedEdge (graph, a, b) {
     return graph.addEdge(a, b, graph.nodeDatas[a].minTime);
 }
 
+function addType (graph, nodeName, type) {
+    if (graph.nodeDatas[nodeName].type) {
+        graph.nodeDatas[nodeName].type += '-';
+    }
+    graph.nodeDatas[nodeName].type += type;
+}
+
+export function addFinish(graph) {
+    graph.nodeDatas['finish'] = createNodeData('finish', 2, 2, 5, 'Serve');
+    addType(graph, 'finish', 'step');
+}
+
 // ********************************
 // Karaage graph
 // ********************************
@@ -127,7 +139,7 @@ graph.nodeDatas = {
     'toss': createNodeData(
         'toss', 2, 2, 5,
         'Put the chicken pieces in the pan and toss to coat each piece with the sauce',
-    ),
+    )
 };
 
 graph.addNode('start');
@@ -146,6 +158,7 @@ addStep(graph, 'coat-chicken', 'marinate-chicken', 'cornstarch');
 
 addIngredient(graph, 'vegetable-oil');
 addStep(graph, 'heat-oil', 'vegetable-oil');
+addType(graph, 'heat-oil', 'ingredient');
 addStep(graph, 'fry-chicken', 'coat-chicken', 'heat-oil');
 
 addIngredient(graph, 'rice-vinegar');
@@ -194,6 +207,7 @@ graph.addNode('finish');
 addIngredient(graph, 'frz-peas');
 addIngredient(graph, 'rice');
 addStep(graph, 'set-rice', 'rice');
+addType(graph, 'set-rice', 'ingredient');
 addStep(graph, 'cook-peas', 'frz-peas');
 addProduct(graph, 'mix-rice', 'set-rice', 'cook-peas');
 
