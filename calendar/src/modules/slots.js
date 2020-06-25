@@ -4,6 +4,7 @@ export var slots = {};
 
 var stepTimes = {};
 var accumSteps = [];
+var totalTime = 0;
 
 slots.getGraphs = function () {
     return graphs;
@@ -31,9 +32,11 @@ function fillSlot1 (graph, order, maxTime, type) {
 
 // Fill slot with accurate step times, accounting for edges, minTime, and activeTime.
 function fillSlot2 (graph, order, maxTime, type) {
-    let totalTime = 0;
+    let slotTime = 0;
     let steps = [];
     let remaining = order.slice();
+    let slotStartTime = Infinity;
+    let minSlotStartTime = totalTime;
 
     // Traverse topological sort in reverse
     for (var i=order.length-1; i>=0; i--) {
@@ -43,9 +46,14 @@ function fillSlot2 (graph, order, maxTime, type) {
 
         if (!type || nodeData.type.includes(type)) {
             let nodeTime = 0;
-            if (steps.length == 0) {
+            let nodeStartTime = 0;
+            let nodeDeltaTime = 0;
+            let shouldBreak = false;
+
+            if (steps.length == 0 && accumSteps.length == 0) {
                 // Always use activeTime for the first (last) step
                 nodeTime = nodeData.activeTime;
+                slotStartTime = minSlotStartTime;
             } else {
                 // Add minTime to the time stored in neigboring step for all other steps
                 let edges = [];
@@ -55,25 +63,53 @@ function fillSlot2 (graph, order, maxTime, type) {
                     if (graph.adjacent(node).includes(stepNode)) {
                         edges.push(stepNode);
                         nodeTime = graph.getEdgeWeight(node, stepNode) + stepTimes[stepNode];
+                        nodeStartTime = stepTimes[stepNode];
+                        nodeDeltaTime = graph.getEdgeWeight(node, stepNode);
                     }
                 }
 
-                if (edges.length != 1) {
+                if (edges.length > 1) {
                     console.log(node);
                     console.log(graph.adjacent(node));
                     console.log(edges);
+                    console.log(allSteps);
+                    console.log(steps);
+                    console.log(accumSteps);
                     throw 'Invalid graph: recipe nodes should always have 1 outgoing edge';
+                } else if(edges.length < 1) {
+                    shouldBreak = true;
+                    console.log('edge-break');
+                    console.log(graph.adjacent(node));
+                    console.log(allSteps);
                 }
                 
-                //nodeTime = edgeTime;
+                nodeStartTime = Math.max(nodeStartTime, minSlotStartTime);
+                slotStartTime = Math.min(slotStartTime, nodeStartTime);
+                nodeTime = nodeStartTime + nodeDeltaTime;
             }
 
             let newTime = Math.max(totalTime, nodeTime);
-            if (newTime > maxTime) {
+            let newSlotTime = newTime - slotStartTime;
+
+            if (newSlotTime > maxTime) {
+                shouldBreak = true;
+                console.log('time-break');
+            }
+
+            if (shouldBreak) {
+                console.log('break');
+                console.log(newTime);
+                console.log(maxTime);
+                console.log(node);
+                console.log(nodeData.activeTime);
+                console.log(nodeData.minTime);
+                console.log(nodeTime);
                 i++;
                 break;
             }
+
             totalTime = newTime;
+            slotTime = newSlotTime;
             steps.unshift(nodeData);
             stepTimes[node] = nodeTime;
             remaining.splice(i, 1);
@@ -82,7 +118,7 @@ function fillSlot2 (graph, order, maxTime, type) {
 
     accumSteps = steps.concat(accumSteps);
 
-    return { steps: steps, time: totalTime, remaining: remaining };
+    return { steps: steps, time: slotTime, remaining: remaining };
 }
 
 function fillSlot (graph, order, maxTime, type) {
@@ -101,6 +137,7 @@ function printSlot (slot) {
 for (let graphName in graphs) {
     stepTimes = {};
     accumSteps = [];
+    totalTime = 0;
 
     console.log('graphName');
     console.log(graphName);
@@ -113,13 +150,15 @@ for (let graphName in graphs) {
     let slot = fillSlot(graph, order, 25, 'step');
     let remaining = slot.remaining;
     printSlot(slot);
-    slot = fillSlot(graph, remaining, 15);
+    slot = fillSlot(graph, remaining, 15, 'ingredient');
     remaining = slot.remaining;
     printSlot(slot);
 
     slot = fillSlot(graph, remaining, 25, 'step');
+    remaining = slot.remaining;
     printSlot(slot);
-    slot = fillSlot(graph, remaining, 15);
+    slot = fillSlot(graph, remaining, 15, 'ingredient');
+    remaining = slot.remaining;
     printSlot(slot);
 
     console.log('remaining');

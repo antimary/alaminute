@@ -43816,6 +43816,7 @@ var slots = {};
 
 var stepTimes = {};
 var accumSteps = [];
+var totalTime = 0;
 
 slots.getGraphs = function () {
     return graphs;
@@ -43843,9 +43844,11 @@ function fillSlot1 (graph, order, maxTime, type) {
 
 // Fill slot with accurate step times, accounting for edges, minTime, and activeTime.
 function fillSlot2 (graph, order, maxTime, type) {
-    let totalTime = 0;
+    let slotTime = 0;
     let steps = [];
     let remaining = order.slice();
+    let slotStartTime = Infinity;
+    let minSlotStartTime = totalTime;
 
     // Traverse topological sort in reverse
     for (var i=order.length-1; i>=0; i--) {
@@ -43855,9 +43858,14 @@ function fillSlot2 (graph, order, maxTime, type) {
 
         if (!type || nodeData.type.includes(type)) {
             let nodeTime = 0;
-            if (steps.length == 0) {
+            let nodeStartTime = 0;
+            let nodeDeltaTime = 0;
+            let shouldBreak = false;
+
+            if (steps.length == 0 && accumSteps.length == 0) {
                 // Always use activeTime for the first (last) step
                 nodeTime = nodeData.activeTime;
+                slotStartTime = minSlotStartTime;
             } else {
                 // Add minTime to the time stored in neigboring step for all other steps
                 let edges = [];
@@ -43867,25 +43875,53 @@ function fillSlot2 (graph, order, maxTime, type) {
                     if (graph.adjacent(node).includes(stepNode)) {
                         edges.push(stepNode);
                         nodeTime = graph.getEdgeWeight(node, stepNode) + stepTimes[stepNode];
+                        nodeStartTime = stepTimes[stepNode];
+                        nodeDeltaTime = graph.getEdgeWeight(node, stepNode);
                     }
                 }
 
-                if (edges.length != 1) {
+                if (edges.length > 1) {
                     console.log(node);
                     console.log(graph.adjacent(node));
                     console.log(edges);
+                    console.log(allSteps);
+                    console.log(steps);
+                    console.log(accumSteps);
                     throw 'Invalid graph: recipe nodes should always have 1 outgoing edge';
+                } else if(edges.length < 1) {
+                    shouldBreak = true;
+                    console.log('edge-break');
+                    console.log(graph.adjacent(node));
+                    console.log(allSteps);
                 }
                 
-                //nodeTime = edgeTime;
+                nodeStartTime = Math.max(nodeStartTime, minSlotStartTime);
+                slotStartTime = Math.min(slotStartTime, nodeStartTime);
+                nodeTime = nodeStartTime + nodeDeltaTime;
             }
 
             let newTime = Math.max(totalTime, nodeTime);
-            if (newTime > maxTime) {
+            let newSlotTime = newTime - slotStartTime;
+
+            if (newSlotTime > maxTime) {
+                shouldBreak = true;
+                console.log('time-break');
+            }
+
+            if (shouldBreak) {
+                console.log('break');
+                console.log(newTime);
+                console.log(maxTime);
+                console.log(node);
+                console.log(nodeData.activeTime);
+                console.log(nodeData.minTime);
+                console.log(nodeTime);
                 i++;
                 break;
             }
+
             totalTime = newTime;
+            slotTime = newSlotTime;
             steps.unshift(nodeData);
             stepTimes[node] = nodeTime;
             remaining.splice(i, 1);
@@ -43894,23 +43930,8 @@ function fillSlot2 (graph, order, maxTime, type) {
 
     accumSteps = steps.concat(accumSteps);
 
-    return { steps: steps, time: totalTime, remaining: remaining };
+    return { steps: steps, time: slotTime, remaining: remaining };
 }
-
-// TODO : rice-peas-ingredients-pass skips cook-peas / frz-peas crashes because cook-peas-neighbor not in accumSteps -- replace-ingredient-pass with all-pass
-
-// TODO : Why does second run through fill have 21 still?
-// TODO : You need to individually splice out nodes now that you're mixing steps / ingredients
-
-// TODO : Print karaage-coat-adjacent after creation (adjacent-to-2-selves?)
-// TODO : Reduce alm slot 30 -> 25 / check heat-oil
-
-// TODO : Fix rice-peas frz-peas->cook-peas edge / cook-peas-not-added->alm-slot??
-    // ISSUE : set-rice is a step that got bumped to the ingredient slot (same as heat-oil)
-// TODO : End-of-fillSlot -> slot-start-time
-// TODO : Beg-of-fillSlot -> slot-min/max-spacing
-// TODO : Fix heat-oil max-30
-// TODO : Initial-print -> recipe-view
 
 function fillSlot (graph, order, maxTime, type) {
     return fillSlot2(graph, order, maxTime, type);
@@ -43928,6 +43949,7 @@ function printSlot (slot) {
 for (let graphName in graphs) {
     stepTimes = {};
     accumSteps = [];
+    totalTime = 0;
 
     console.log('graphName');
     console.log(graphName);
@@ -43937,16 +43959,18 @@ for (let graphName in graphs) {
     console.log("order");
     console.log(order);
 
-    let slot = fillSlot(graph, order, 30, 'step');
+    let slot = fillSlot(graph, order, 25, 'step');
     let remaining = slot.remaining;
     printSlot(slot);
-    slot = fillSlot(graph, remaining, 15);
+    slot = fillSlot(graph, remaining, 15, 'ingredient');
     remaining = slot.remaining;
     printSlot(slot);
 
     slot = fillSlot(graph, remaining, 25, 'step');
+    remaining = slot.remaining;
     printSlot(slot);
-    slot = fillSlot(graph, remaining, 15);
+    slot = fillSlot(graph, remaining, 15, 'ingredient');
+    remaining = slot.remaining;
     printSlot(slot);
 
     console.log('remaining');
