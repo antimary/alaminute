@@ -53,7 +53,7 @@ function fillSlot2 (graph, order, maxTime, type) {
     for (var i=order.length-1; i>=0; i--) {
         let node = order[i];
         let nodeData = graph.nodeDatas[node];
-        if (!nodeData || !nodeData.type) { continue; }
+        if (!nodeData || !nodeData.type) { remaining.splice(i, 1); continue; }
 
         if (isType(graph, node, type)) {
             let nodeTime = 0;
