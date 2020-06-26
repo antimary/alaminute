@@ -5,6 +5,7 @@ export var slots = {};
 var stepTimes = {};
 var accumSteps = [];
 var totalTime = 0;
+var lastBreak = { node: null, time: null };
 
 slots.getGraphs = function () {
     return graphs;
@@ -30,13 +31,22 @@ function fillSlot1 (graph, order, maxTime, type) {
     return { steps: steps, time: totalTime, remaining: order.slice(0, i)};
 }
 
+function isType (graph, node, type) {
+    let nodeData = graph.nodeDatas[node];
+    if (!nodeData || !nodeData.type || !type) {
+        return false;
+    }
+
+    return nodeData.type.includes(type);
+}
+
 // Fill slot with accurate step times, accounting for edges, minTime, and activeTime.
 function fillSlot2 (graph, order, maxTime, type) {
     let slotTime = 0;
     let steps = [];
     let remaining = order.slice();
     let slotStartTime = Infinity;
-    let minSlotStartTime = totalTime;
+    let minSlotStartTime = isType(graph, lastBreak.node, type) ? Math.max(lastBreak.time, totalTime) : totalTime;
 
     // Traverse topological sort in reverse
     for (var i=order.length-1; i>=0; i--) {
@@ -44,10 +54,9 @@ function fillSlot2 (graph, order, maxTime, type) {
         let nodeData = graph.nodeDatas[node];
         if (!nodeData || !nodeData.type) { continue; }
 
-        if (!type || nodeData.type.includes(type)) {
+        if (isType(graph, node, type)) {
             let nodeTime = 0;
             let nodeStartTime = 0;
-            let nodeDeltaTime = 0;
             let shouldBreak = false;
 
             if (steps.length == 0 && accumSteps.length == 0) {
@@ -111,6 +120,9 @@ function fillSlot2 (graph, order, maxTime, type) {
                 console.log(nodeData.activeTime);
                 console.log(nodeData.minTime);
                 console.log(nodeTime);
+
+                lastBreak.node = node;
+                lastBreak.time = nodeTime;
                 i++;
                 break;
             }
