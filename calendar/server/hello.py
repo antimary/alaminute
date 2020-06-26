@@ -33,6 +33,8 @@ print '<title>Hello World - First CGI Program</title>'
 print '</head>'
 print '<body>'
 print '<h2>Hello World! This is my first CGI program</h2>'
-os.system("python /Users/antimary/Sites/alaminute/ingredient-phrase-tagger/bin/parse-ingredients.py /Users/antimary/Sites/alaminute/ingredient-phrase-tagger/bin/input.txt")
 print '</body>'
 print '</html>'
+
+output = os.popen("python /Users/antimary/Sites/alaminute/ingredient-phrase-tagger/bin/parse-ingredients.py /Users/antimary/Sites/alaminute/ingredient-phrase-tagger/bin/input.txt").read()
+print output
