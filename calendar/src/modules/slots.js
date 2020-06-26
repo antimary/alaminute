@@ -63,8 +63,7 @@ function fillSlot2 (graph, order, maxTime, type) {
                     if (graph.adjacent(node).includes(stepNode)) {
                         edges.push(stepNode);
                         nodeTime = graph.getEdgeWeight(node, stepNode) + stepTimes[stepNode];
-                        nodeStartTime = stepTimes[stepNode];
-                        nodeDeltaTime = graph.getEdgeWeight(node, stepNode);
+                        nodeStartTime = nodeTime - nodeData.activeTime;
                     }
                 }
 
@@ -83,9 +82,13 @@ function fillSlot2 (graph, order, maxTime, type) {
                     console.log(allSteps);
                 }
                 
+                // Ensure that we don't overlap with previous slot
                 nodeStartTime = Math.max(nodeStartTime, minSlotStartTime);
+                if (nodeStartTime == minSlotStartTime) {
+                    nodeTime = nodeStartTime + nodeData.activeTime;
+                }
+                // Ensure that the slot ends at the closest node to the finish
                 slotStartTime = Math.min(slotStartTime, nodeStartTime);
-                nodeTime = nodeStartTime + nodeDeltaTime;
             }
 
             let newTime = Math.max(totalTime, nodeTime);
@@ -98,8 +101,12 @@ function fillSlot2 (graph, order, maxTime, type) {
 
             if (shouldBreak) {
                 console.log('break');
-                console.log(newTime);
-                console.log(maxTime);
+                console.log('new: ' + newTime);
+                console.log('node: ' + nodeTime);
+                console.log('node start: ' + nodeStartTime);
+                console.log('slot: ' + newSlotTime);
+                console.log('start: ' + slotStartTime);
+                console.log('max: ' + maxTime);
                 console.log(node);
                 console.log(nodeData.activeTime);
                 console.log(nodeData.minTime);
@@ -146,24 +153,24 @@ for (let graphName in graphs) {
     let order = graph.topologicalSort(['start'], undefined, graph.criticalSort);
     console.log("order");
     console.log(order);
+    let prevLength = 0;
+    let slot;
 
-    let slot = fillSlot(graph, order, 25, 'step');
-    let remaining = slot.remaining;
-    printSlot(slot);
-    slot = fillSlot(graph, remaining, 15, 'ingredient');
-    remaining = slot.remaining;
-    printSlot(slot);
+    while (order.length > 0 && order.length != prevLength) {
+        prevLength = order.length;
 
-    slot = fillSlot(graph, remaining, 25, 'step');
-    remaining = slot.remaining;
-    printSlot(slot);
-    slot = fillSlot(graph, remaining, 15, 'ingredient');
-    remaining = slot.remaining;
-    printSlot(slot);
+        slot = fillSlot(graph, order, 25, 'step');
+        order = slot.remaining;
+        printSlot(slot);
+        slot = fillSlot(graph, order, 15, 'ingredient');
+        order = slot.remaining;
+        printSlot(slot);   
 
-    console.log('remaining');
-    console.log(remaining);
+        console.log('remaining');
+        console.log(order);
+    }
 
+    // TODO : Is this used anywhere?
     slots[graphName] = {
         graph: graph,
         steps: slot.steps,
