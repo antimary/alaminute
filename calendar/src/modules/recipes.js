@@ -272,6 +272,7 @@ addIngredient(graph, 'spin-sugar');
 addIngredient(graph, 'spin-soy');
 addIngredient(graph, 'ses-2');
 addIngredient(graph, 'boil-pot');
+addType(graph, 'boil-pot', 'step');
 addStep(graph, 'cook-spin', 'boil-pot', 'spinach');
 addStep(graph, 'mix-spin', 'cook-spin', 'tahini', 'ses-1', 'spin-sugar', 'spin-soy');
 addProduct(graph, 'serve-spin', 'mix-spin', 'ses-2');

@@ -43670,6 +43670,7 @@ addIngredient(recipes_graph, 'spin-sugar');
 addIngredient(recipes_graph, 'spin-soy');
 addIngredient(recipes_graph, 'ses-2');
 addIngredient(recipes_graph, 'boil-pot');
+addType(recipes_graph, 'boil-pot', 'step');
 addStep(recipes_graph, 'cook-spin', 'boil-pot', 'spinach');
 addStep(recipes_graph, 'mix-spin', 'cook-spin', 'tahini', 'ses-1', 'spin-sugar', 'spin-soy');
 addProduct(recipes_graph, 'serve-spin', 'mix-spin', 'ses-2');
@@ -43859,6 +43860,7 @@ function fillSlot2 (graph, order, maxTime, type) {
     let remaining = order.slice();
     let slotStartTime = Infinity;
     let minSlotStartTime = isType(graph, lastBreak.node, type) ? Math.max(lastBreak.time, totalTime) : totalTime;
+    let totalActiveTime = 0;
 
     // Traverse topological sort in reverse
     for (var i=order.length-1; i>=0; i--) {
@@ -43912,7 +43914,8 @@ function fillSlot2 (graph, order, maxTime, type) {
                 slotStartTime = Math.min(slotStartTime, nodeStartTime);
             }
 
-            let newTime = Math.max(totalTime, nodeTime);
+            totalActiveTime += nodeData.activeTime;
+            let newTime = Math.max(totalTime, nodeTime, slotStartTime + totalActiveTime);
             let newSlotTime = newTime - slotStartTime;
 
             if (newSlotTime > maxTime) {
@@ -43922,16 +43925,13 @@ function fillSlot2 (graph, order, maxTime, type) {
 
             if (shouldBreak) {
                 console.log('break');
+                console.log(node);
                 console.log('new: ' + newTime);
                 console.log('node: ' + nodeTime);
                 console.log('node start: ' + nodeStartTime);
                 console.log('slot: ' + newSlotTime);
                 console.log('start: ' + slotStartTime);
                 console.log('max: ' + maxTime);
-                console.log(node);
-                console.log(nodeData.activeTime);
-                console.log(nodeData.minTime);
-                console.log(nodeTime);
 
                 lastBreak.node = node;
                 lastBreak.time = nodeTime;
