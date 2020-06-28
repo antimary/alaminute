@@ -43463,6 +43463,18 @@ function addWeightedEdge (graph, a, b) {
     return graph.addEdge(a, b, graph.nodeDatas[a].minTime);
 }
 
+function addType (graph, nodeName, type) {
+    if (graph.nodeDatas[nodeName].type) {
+        graph.nodeDatas[nodeName].type += '-';
+    }
+    graph.nodeDatas[nodeName].type += type;
+}
+
+function addFinish(graph) {
+    graph.nodeDatas['finish'] = createNodeData('finish', 2, 2, 5, 'Serve');
+    addType(graph, 'finish', 'step');
+}
+
 // ********************************
 // Karaage graph
 // ********************************
@@ -43531,8 +43543,8 @@ recipes_graph.nodeDatas = {
         'green-onion', 5, 5, 2*60,
         '4 T finely chopped green onion',
     ),
-    'sugar': createNodeData(
-        'sugar', 1, 1, Infinity,
+    'kara-sugar': createNodeData(
+        'kara-sugar', 1, 1, Infinity,
         'Pinch sugar',
     ),
     'sesame-oil': createNodeData(
@@ -43551,7 +43563,7 @@ recipes_graph.nodeDatas = {
     'toss': createNodeData(
         'toss', 2, 2, 5,
         'Put the chicken pieces in the pan and toss to coat each piece with the sauce',
-    ),
+    )
 };
 
 recipes_graph.addNode('start');
@@ -43570,15 +43582,16 @@ addStep(recipes_graph, 'coat-chicken', 'marinate-chicken', 'cornstarch');
 
 addIngredient(recipes_graph, 'vegetable-oil');
 addStep(recipes_graph, 'heat-oil', 'vegetable-oil');
+addType(recipes_graph, 'heat-oil', 'ingredient');
 addStep(recipes_graph, 'fry-chicken', 'coat-chicken', 'heat-oil');
 
 addIngredient(recipes_graph, 'rice-vinegar');
 addIngredient(recipes_graph, 'sauce-soy');
 addIngredient(recipes_graph, 'green-onion');
-addIngredient(recipes_graph, 'sugar');
+addIngredient(recipes_graph, 'kara-sugar');
 addIngredient(recipes_graph, 'sesame-oil');
 addIngredient(recipes_graph, 'sauce-ginger');
-addStep(recipes_graph, 'sauce', 'rice-vinegar', 'sauce-soy', 'green-onion', 'sugar', 'sesame-oil', 'sauce-ginger');
+addStep(recipes_graph, 'sauce', 'rice-vinegar', 'sauce-soy', 'green-onion', 'kara-sugar', 'sesame-oil', 'sauce-ginger');
 addProduct(recipes_graph, 'toss', 'fry-chicken', 'sauce');
 
 
@@ -43618,6 +43631,7 @@ recipes_graph.addNode('finish');
 addIngredient(recipes_graph, 'frz-peas');
 addIngredient(recipes_graph, 'rice');
 addStep(recipes_graph, 'set-rice', 'rice');
+addType(recipes_graph, 'set-rice', 'ingredient');
 addStep(recipes_graph, 'cook-peas', 'frz-peas');
 addProduct(recipes_graph, 'mix-rice', 'set-rice', 'cook-peas');
 
@@ -43642,12 +43656,12 @@ recipes_graph.nodeDatas = {
         'ses-1', 1, 1, Infinity,
         '1 t white sesame seeds, toasted',
     ),
-    'sugar': createNodeData(
-        'sugar', 1, 1, Infinity,
+    'spin-sugar': createNodeData(
+        'spin-sugar', 1, 1, Infinity,
         '1 t sugar',
     ),
-    'soy': createNodeData(
-        'soy', 1, 1, Infinity,
+    'spin-soy': createNodeData(
+        'spin-soy', 1, 1, Infinity,
         '1/2 T soy sauce',
     ),
     'ses-2': createNodeData(
@@ -43678,12 +43692,13 @@ recipes_graph.addNode('finish');
 addIngredient(recipes_graph, 'spinach');
 addIngredient(recipes_graph, 'tahini');
 addIngredient(recipes_graph, 'ses-1');
-addIngredient(recipes_graph, 'sugar');
-addIngredient(recipes_graph, 'soy');
+addIngredient(recipes_graph, 'spin-sugar');
+addIngredient(recipes_graph, 'spin-soy');
 addIngredient(recipes_graph, 'ses-2');
 addIngredient(recipes_graph, 'boil-pot');
+addType(recipes_graph, 'boil-pot', 'step');
 addStep(recipes_graph, 'cook-spin', 'boil-pot', 'spinach');
-addStep(recipes_graph, 'mix-spin', 'cook-spin', 'tahini', 'ses-1', 'sugar', 'soy');
+addStep(recipes_graph, 'mix-spin', 'cook-spin', 'tahini', 'ses-1', 'spin-sugar', 'spin-soy');
 addProduct(recipes_graph, 'serve-spin', 'mix-spin', 'ses-2');
 
 
@@ -43726,13 +43741,7 @@ addIngredient(recipes_graph, 'salt');
 addStep(recipes_graph, 'cook-pepp', 'pepp', 'dashi', 'salt');
 addProduct(recipes_graph, 'serve-pepp', 'cook-pepp');
 
-
-// ********************************
-// Recipe post-processing
-// ********************************
-for (let recipeName in recipes) {
-    let graph = recipes[recipeName];
-
+function computeCriticalSort(graph) {
     // Calculate critical path for recipe graph
     var criticalPathObj = graph.criticalPath();
     var criticalPath = criticalPathObj.path;
@@ -43748,7 +43757,7 @@ for (let recipeName in recipes) {
     var distances = graph.distanceFromPath(criticalPath, 'start');
 
     // Set a function on the graph to sort nodes in order of increasing critical distance
-    graph.criticalSort = function (nodes) {
+    var criticalSort = function (nodes) {
         let result = [];
         for (let i=0; i<nodes.length; i++) {
             let dist = distances[nodes[i]];
@@ -43760,28 +43769,85 @@ for (let recipeName in recipes) {
         }
         return result;
     }
+    return criticalSort;
+}
+
+// ********************************
+// Recipe post-processing
+// ********************************
+for (let recipeName in recipes) {
+    let graph = recipes[recipeName];
+
+    graph.criticalSort = computeCriticalSort(graph);
 }
 // CONCATENATED MODULE: ./src/modules/graphs.js
 
 
 
 var graphs = recipes;
+createMealGraph(Object.keys(graphs));
 
-// graph.addNode('chicken-karaage', {
-//     'steps' : [
-//         {'node' : 'marinated-chicken-for-karaage'},
-//         {'step' : 'drain marinate, coat in cornstarch'},
-//         {'step' : 'heat-oil, fry chicken, turn, drain on paper towels'},
-//     ],
-// });
+function createMealGraph (recipeNames) {
+    let mealGraph = new graph_data_structure_default.a();
+    mealGraph.addNode('start');
+    mealGraph.addNode('finish');
+    mealGraph.nodeDatas = {};
+    mealGraph.title = 'Karaage Bento';
+    mealGraph.img = './assets/Karaage-Bento-500x400.jpg';
 
+    let mealName = '';
+    for (let i=0; i<recipeNames.length; i++) {
+        // Accumulate meal name from recipe names
+        let recipeName = recipeNames[i];
+        if (mealName != '') {
+            mealName += '/';
+        }
+        mealName += recipeName;
 
+        // Add recipe nodes to meal graph (except start / finish)
+        let recipeGraph = graphs[recipeName];
+        let nodes = recipeGraph.nodes();
+        for (let j=0; j<nodes.length; j++) {
+            let node = nodes[j];
+            if (node != 'start' && node != 'finish') {
+                mealGraph.addNode(node);
+                mealGraph.nodeDatas[node] = recipeGraph.nodeDatas[node];
+            }
+        }
+
+        // Add recipe edges to meal graph (connecting back to meal start/finish above)
+        for (let j=0; j<nodes.length; j++) {
+            let node = nodes[j];
+            let adjacent = recipeGraph.adjacent(node);
+            for (let k=0; k<adjacent.length; k++) {
+                let adjNode = adjacent[k];
+                let weight = recipeGraph.getEdgeWeight(node, adjNode);
+                mealGraph.addEdge(node, adjNode, weight);
+            }
+        }
+    }
+
+    // Add node data and type to finish to allow multiple incoming edges
+    addFinish(mealGraph);
+
+    // Compute critical sort on completed graph
+    mealGraph.criticalSort = computeCriticalSort(mealGraph);
+
+    // Add to graphs (key=accum-recipe-name)
+    graphs[mealName] = mealGraph;
+}
 // CONCATENATED MODULE: ./src/modules/slots.js
 
 
 var slotsMap = {};
 
-function fillSlot (graph, order, maxTime, type) {
+var stepTimes = {};
+var accumSteps = [];
+var totalTime = 0;
+var lastBreak = { node: null, time: null };
+
+// Fill slot using activeTime as a proxy for step times.
+function fillSlot1 (graph, order, maxTime, type) {
     let totalTime = 0;
     let steps = [];
     for (var i=order.length-1; i>=0; i--) {
@@ -43800,6 +43866,118 @@ function fillSlot (graph, order, maxTime, type) {
     return { steps: steps, time: totalTime, remaining: order.slice(0, i)};
 }
 
+function isType (graph, node, type) {
+    let nodeData = graph.nodeDatas[node];
+    if (!nodeData || !nodeData.type || !type) {
+        return false;
+    }
+
+    return nodeData.type.includes(type);
+}
+
+// Fill slot with accurate step times, accounting for edges, minTime, and activeTime.
+function fillSlot2 (graph, order, maxTime, type) {
+    let slotTime = 0;
+    let steps = [];
+    let remaining = order.slice();
+    let slotStartTime = Infinity;
+    let minSlotStartTime = isType(graph, lastBreak.node, type) ? Math.max(lastBreak.time, totalTime) : totalTime;
+    let totalActiveTime = 0;
+
+    // Traverse topological sort in reverse
+    for (var i=order.length-1; i>=0; i--) {
+        let node = order[i];
+        let nodeData = graph.nodeDatas[node];
+        if (!nodeData || !nodeData.type) { remaining.splice(i, 1); continue; }
+
+        if (isType(graph, node, type)) {
+            let nodeTime = 0;
+            let nodeStartTime = 0;
+            let shouldBreak = false;
+
+            if (steps.length == 0 && accumSteps.length == 0) {
+                // Always use activeTime for the first (last) step
+                nodeTime = nodeData.activeTime;
+                slotStartTime = minSlotStartTime;
+            } else {
+                // Add minTime to the time stored in neigboring step for all other steps
+                let edges = [];
+                let allSteps = steps.concat(accumSteps);
+                for (let j=allSteps.length-1; j>=0; j--) {
+                    let stepNode = allSteps[j].name;
+                    if (graph.adjacent(node).includes(stepNode)) {
+                        edges.push(stepNode);
+                        nodeTime = graph.getEdgeWeight(node, stepNode) + stepTimes[stepNode];
+                        nodeStartTime = nodeTime - nodeData.activeTime;
+                    }
+                }
+
+                if (edges.length > 1) {
+                    console.log(node);
+                    console.log(graph.adjacent(node));
+                    console.log(edges);
+                    console.log(allSteps);
+                    console.log(steps);
+                    console.log(accumSteps);
+                    throw 'Invalid graph: recipe nodes should always have 1 outgoing edge';
+                } else if(edges.length < 1) {
+                    shouldBreak = true;
+                    console.log('edge-break');
+                    console.log(graph.adjacent(node));
+                    console.log(allSteps);
+                }
+                
+                // Ensure that we don't overlap with previous slot
+                nodeStartTime = Math.max(nodeStartTime, minSlotStartTime);
+                if (nodeStartTime == minSlotStartTime) {
+                    nodeTime = nodeStartTime + nodeData.activeTime;
+                }
+                // Ensure that the slot ends at the closest node to the finish
+                slotStartTime = Math.min(slotStartTime, nodeStartTime);
+            }
+
+            totalActiveTime += nodeData.activeTime;
+            let newTime = Math.max(totalTime, nodeTime, slotStartTime + totalActiveTime);
+            let newSlotTime = newTime - slotStartTime;
+
+            if (newSlotTime > maxTime) {
+                shouldBreak = true;
+                console.log('time-break');
+            }
+
+            if (shouldBreak) {
+                console.log('break');
+                console.log(node);
+                console.log('new: ' + newTime);
+                console.log('node: ' + nodeTime);
+                console.log('node start: ' + nodeStartTime);
+                console.log('slot: ' + newSlotTime);
+                console.log('start: ' + slotStartTime);
+                console.log('max: ' + maxTime);
+
+                lastBreak.node = node;
+                lastBreak.time = nodeTime;
+                i++;
+                break;
+            }
+
+            totalTime = newTime;
+            slotTime = newSlotTime;
+            steps.unshift(nodeData);
+            stepTimes[node] = nodeTime;
+            remaining.splice(i, 1);
+        }
+    }
+
+    accumSteps = steps.concat(accumSteps);
+
+    return { steps: steps, time: slotTime, remaining: remaining };
+}
+
+function fillSlot (graph, order, maxTime, type) {
+    return fillSlot2(graph, order, maxTime, type);
+}
+
 function printSlot (slot) {
     let steps = slot.steps;
     console.log("Time: " + slot.time);
@@ -43810,35 +43988,36 @@ function printSlot (slot) {
 }
 
 for (let graphName in graphs) {
+    stepTimes = {};
+    accumSteps = [];
+    totalTime = 0;
+
     console.log('graphName');
     console.log(graphName);
     let graph = graphs[graphName];
-    console.log(graph);
 
-    console.log("order");
-    console.log(graph.criticalSort);
     let order = graph.topologicalSort(['start'], undefined, graph.criticalSort);
+    console.log("order");
     console.log(order);
-
+    let prevLength = 0;
+    let slot;
     let slots = [];
-    let slot = fillSlot(graph, order, 25, 'step');
-    slots.unshift(slot);
-    let remainingSteps = slot.remaining;
-    printSlot(slot);
-    slot = fillSlot(graph, order, 15, 'ingredient');
-    slots.unshift(slot);
-    let remainingIngredients = slot.remaining;
-    printSlot(slot);
 
-    slot = fillSlot(graph, remainingSteps, 25, 'step');
-    slots.unshift(slot);
-    printSlot(slot);
-    slot = fillSlot(graph, remainingIngredients, 15, 'ingredient');
-    slots.unshift(slot);
-    printSlot(slot);
+    while (order.length > 0 && order.length != prevLength) {
+        prevLength = order.length;
 
-    console.log(remainingSteps);
-    console.log(remainingIngredients);
+        slot = fillSlot(graph, order, 25, 'step');
+        order = slot.remaining;
+        printSlot(slot);
+        slots.unshift(slot);
+        slot = fillSlot(graph, order, 15, 'ingredient');
+        order = slot.remaining;
+        printSlot(slot);
+        slots.unshift(slot);
+
+        console.log('remaining');
+        console.log(order);
+    }
 
     slotsMap[graphName] = {
         graphName: graphName,
@@ -44144,12 +44323,8 @@ class RecipeList {
         // Create recipe title node (float-text)
         element.appendChild(document.createTextNode(recipeGraph.title));
         // Create click handler (open-recipe-view)
-        console.log('recipe-list-2');
-        console.log(this.recipeList);
         let recipeList = this.recipeList;
         element.addEventListener('click', function () {
-            console.log('recipe-list-3');
-            console.log(recipeList);
             recipeList.dispatchEvent(new CustomEvent('click-recipe-list', {
                 detail: slots,
             }));
@@ -44191,7 +44366,7 @@ recipeList.recipeList.addEventListener('click-recipe-list', function (event) {
     
 });
 console.log(slotsMap);
-console.log(recipeList);
+
 
 /***/ })
 /******/ ]);

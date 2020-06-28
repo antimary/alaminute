@@ -30,4 +30,3 @@ recipeList.recipeList.addEventListener('click-recipe-list', function (event) {
     
 });
 console.log(slotsMap);
-console.log(recipeList);
