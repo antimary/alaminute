@@ -132,7 +132,13 @@ function fillSlot2 (graph, order, maxTime, type) {
 
     accumSteps = steps.concat(accumSteps);
 
-    return { steps: steps, time: slotTime, remaining: remaining };
+    return { steps: steps, time: slotTime, start: slotStartTime, remaining: remaining };
+}
+
+export function getSpace(prevSlot, nextSlot) {
+    let prevTime = prevSlot.start;
+    let nextTime = nextSlot.start + nextSlot.time;
+    return prevTime - nextTime;
 }
 
 function fillSlot (graph, order, maxTime, type) {
@@ -170,11 +176,15 @@ for (let graphName in graphs) {
         slot = fillSlot(graph, order, 25, 'step');
         order = slot.remaining;
         printSlot(slot);
-        slots.unshift(slot);
+        if (slot.steps.length) {
+            slots.unshift(slot);
+        }
         slot = fillSlot(graph, order, 15, 'ingredient');
         order = slot.remaining;
         printSlot(slot);
-        slots.unshift(slot);
+        if (slot.steps.length) {
+            slots.unshift(slot);
+        }
 
         console.log('remaining');
         console.log(order);

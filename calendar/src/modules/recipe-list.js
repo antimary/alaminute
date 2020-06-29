@@ -4,8 +4,6 @@ export class RecipeList {
     constructor (id, slotsMap) {
         this.recipeList = document.getElementById(id);
         this.createRecipeList(this.recipeList, slotsMap);
-        console.log('recipe-list');
-        console.log(this.recipeList);
     }
 
     createRecipeList (parent, slotsMap) {
