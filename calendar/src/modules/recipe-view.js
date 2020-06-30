@@ -60,9 +60,20 @@ function showSlot(slot, parent, index) {
     slotView.style.textAlign = 'left';
     slotView.style.margin = '25px';
     slotView.style.border = 'thin solid grey';
-    slotView.appendChild(document.createElement('div')).appendChild(document.createTextNode('Time: ' + slot.time));
+    slotView.style.backgroundColor = 'white';
+
+    var slotHeader = Object.assign(slotView.appendChild(document.createElement('div')), {
+        id: 'slot-header-' + slot.graphName + '-' + index,
+    });
+    slotHeader.style.margin = '10px';
+    slotHeader.appendChild(document.createElement('div')).appendChild(document.createTextNode('Time: ' + slot.time));
+
+    var slotContent = Object.assign(slotView.appendChild(document.createElement('div')), {
+        id: 'slot-content-' + slot.graphName + '-' + index,
+    });
+    slotContent.style.margin = '10px';
     for (let i=0; i<slot.steps.length; i++) {
-        slotView.appendChild(document.createElement('div')).appendChild(document.createTextNode(slot.steps[i].instructions));
+        slotContent.appendChild(document.createElement('div')).appendChild(document.createTextNode(slot.steps[i].instructions));
     }
 }
 
