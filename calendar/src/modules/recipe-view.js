@@ -3,9 +3,16 @@ import { getSpace } from './slots.js';
 
 export function showRecipeView (slots) {
     var mainContent = document.getElementById('main-content');
-    var recipeView = Object.assign(mainContent.appendChild(document.createElement('div')), {
+    var recipeViewParent = Object.assign(mainContent.appendChild(document.createElement('div')), {
+        id: 'recipe-view-parent',
+    });
+    recipeViewParent.style.width = '100%';
+    recipeViewParent.style.textAlign = 'center';
+    var recipeView = Object.assign(recipeViewParent.appendChild(document.createElement('div')), {
         id: 'recipe-view',
     });
+    recipeView.style.width = '500px';
+    recipeView.style.display = 'inline-block';
 
     // Header section
     var recipeHeader = Object.assign(recipeView.appendChild(document.createElement('div')), {
@@ -81,6 +88,6 @@ function showSlots(slots, parent) {
 
 export function hideRecipeView () {
     var mainContent = document.getElementById('main-content');
-    var recipeView = document.getElementById('recipe-view');
-    mainContent.removeChild(recipeView);
+    var recipeViewParent = document.getElementById('recipe-view-parent');
+    mainContent.removeChild(recipeViewParent);
 }
