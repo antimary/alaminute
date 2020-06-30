@@ -59,19 +59,38 @@ function showSlot(slot, parent, index) {
     });
     slotView.style.textAlign = 'left';
     slotView.style.margin = '25px';
+    slotView.style.border = 'thin solid grey';
     slotView.appendChild(document.createElement('div')).appendChild(document.createTextNode('Time: ' + slot.time));
     for (let i=0; i<slot.steps.length; i++) {
         slotView.appendChild(document.createElement('div')).appendChild(document.createTextNode(slot.steps[i].instructions));
     }
 }
 
+function formatSpace(spaceTime) {
+    let days = Math.floor(spaceTime / (60 * 24));
+    let hours = Math.floor((spaceTime - (60*24*days)) / 60);
+    let minutes = spaceTime - (60*24*days) - 60*hours;
+
+    let result = minutes + 'm';
+    if (hours > 0) {
+        result = hours + 'h ' + result;
+    }
+    if (days > 0) {
+        result = days + 'd ' + result;
+    }
+    return result;
+}
+
 function showSpace(prevSlot, nextSlot, parent) {
-    let spaceView = Object.assign(parent.appendChild(document.createElement('div')), {
-        id: 'space-' + prevSlot.graphName + '-' + nextSlot.graphName,
-    });
-    spaceView.appendChild(document.createElement('div')).appendChild(
-        document.createTextNode('Space: ' + getSpace(prevSlot, nextSlot)
-    ));
+    let spaceTime = getSpace(prevSlot, nextSlot);
+    if (spaceTime > 0) {
+        let spaceView = Object.assign(parent.appendChild(document.createElement('div')), {
+            id: 'space-' + prevSlot.graphName + '-' + nextSlot.graphName,
+        });
+        spaceView.appendChild(document.createElement('div')).appendChild(
+            document.createTextNode(formatSpace(spaceTime))
+        );
+    }
 }
 
 function showSlots(slots, parent) {
