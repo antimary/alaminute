@@ -49,10 +49,10 @@ export function showRecipeView (slots) {
     recipeSummary.style.color = 'grey';
     recipeSummary.style.fontSize = '75%';
     recipeSummary.appendChild(document.createElement('div')).appendChild(
-        document.createTextNode(getSessionSummary(slots))
+        document.createTextNode(getTimeSummary(slots))
     );
     recipeSummary.appendChild(document.createElement('div')).appendChild(
-        document.createTextNode(getTimeSummary(slots))
+        document.createTextNode(getSessionSummary(slots))
     );
 
     showSlots(slots, recipeView);

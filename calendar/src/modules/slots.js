@@ -179,7 +179,7 @@ export var slotUtils = {
         let slotTime = 0;
         for (let i=0; i<slots.slots.length; i++) {
             let currSlot = slots.slots[i];
-            slotTime += currSlot.slotTime;
+            slotTime += currSlot.time;
         }
         return slotTime;
     },
