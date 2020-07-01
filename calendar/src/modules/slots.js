@@ -5,6 +5,7 @@ export var slotsMap = {};
 var stepTimes = {};
 var accumSteps = [];
 var totalTime = 0;
+var numSessions = 0;
 var lastBreak = { node: null, time: null };
 
 // Fill slot using activeTime as a proxy for step times.
@@ -37,13 +38,15 @@ function isType (graph, node, type) {
 }
 
 // Fill slot with accurate step times, accounting for edges, minTime, and activeTime.
-function fillSlot2 (graph, order, maxTime, type) {
+function fillSlot2 (graph, order, maxTime, type, slotName) {
+    console.log('total-time : ' + totalTime);
     let slotTime = 0;
     let steps = [];
     let remaining = order.slice();
     let slotStartTime = Infinity;
     let minSlotStartTime = isType(graph, lastBreak.node, type) ? Math.max(lastBreak.time, totalTime) : totalTime;
     let totalActiveTime = 0;
+    let longestStep = { node: null, time: 0 }
 
     // Traverse topological sort in reverse
     for (var i=order.length-1; i>=0; i--) {
@@ -122,6 +125,14 @@ function fillSlot2 (graph, order, maxTime, type) {
                 break;
             }
 
+            if (nodeData.minTime > longestStep.time) {
+                console.log('longest step');
+                console.log(node);
+                console.log(nodeData.minTime);
+                longestStep.node = node;
+                longestStep.time = nodeData.minTime;
+            }
+
             totalTime = newTime;
             slotTime = newSlotTime;
             steps.unshift(nodeData);
@@ -132,17 +143,41 @@ function fillSlot2 (graph, order, maxTime, type) {
 
     accumSteps = steps.concat(accumSteps);
 
-    return { steps: steps, time: slotTime, start: slotStartTime, remaining: remaining };
+    return { 
+        name: slotName, 
+        steps: steps, 
+        longestStep: longestStep, 
+        time: slotTime, 
+        start: slotStartTime, 
+        remaining: remaining 
+    };
 }
 
-export function getSpace(prevSlot, nextSlot) {
-    let prevTime = prevSlot.start;
-    let nextTime = nextSlot.start + nextSlot.time;
-    return prevTime - nextTime;
+export var slotUtils = {
+    getSpace (prevSlot, nextSlot) {
+        let prevTime = prevSlot.start;
+        let nextTime = nextSlot.start + nextSlot.time;
+        return prevTime - nextTime;
+    },
+
+    isThaw (slot) {
+        return slot.longestStep.node.includes('thaw');
+    },
+
+    getNumThaws (slots) {
+        let numThaws = 0;
+        for (let i=0; i<slots.slots.length; i++) {
+            let currSlot = slots.slots[i];
+            if (this.isThaw(currSlot)) {
+                numThaws++;
+            }
+        }
+        return numThaws;
+    },
 }
 
-function fillSlot (graph, order, maxTime, type) {
-    return fillSlot2(graph, order, maxTime, type);
+function fillSlot (graph, order, maxTime, type, slotName) {
+    return fillSlot2(graph, order, maxTime, type, slotName);
 }
 
 function printSlot (slot) {
@@ -154,10 +189,21 @@ function printSlot (slot) {
     }
 }
 
+let stepSlotNames = ['Á la Minute', 'Prep'];
+let stepNameIndex = 0;
+let ingredientSlotNames = ['Mise'];
+let ingredientNameIndex = 0;
+
+function incrementNameIndex() {
+    stepNameIndex = Math.min(stepNameIndex + 1, stepSlotNames.length - 1);
+    ingredientNameIndex = Math.min(ingredientNameIndex + 1, ingredientSlotNames.length - 1);
+}
+
 for (let graphName in graphs) {
     stepTimes = {};
     accumSteps = [];
     totalTime = 0;
+    numSessions = 0;
 
     console.log('graphName');
     console.log(graphName);
@@ -173,18 +219,21 @@ for (let graphName in graphs) {
     while (order.length > 0 && order.length != prevLength) {
         prevLength = order.length;
 
-        slot = fillSlot(graph, order, 25, 'step');
+        slot = fillSlot(graph, order, 25, 'step', stepSlotNames[stepNameIndex]);
+        order = slot.remaining;
+        printSlot(slot);
+        if (slot.steps.length) {
+            slots.unshift(slot);
+            numSessions++;  // Increment sessions for each steps slot
+        }
+        slot = fillSlot(graph, order, 15, 'ingredient', ingredientSlotNames[ingredientNameIndex]);
         order = slot.remaining;
         printSlot(slot);
         if (slot.steps.length) {
             slots.unshift(slot);
         }
-        slot = fillSlot(graph, order, 15, 'ingredient');
-        order = slot.remaining;
-        printSlot(slot);
-        if (slot.steps.length) {
-            slots.unshift(slot);
-        }
+
+        incrementNameIndex();
 
         console.log('remaining');
         console.log(order);
@@ -194,5 +243,6 @@ for (let graphName in graphs) {
         graphName: graphName,
         graph: graph,
         slots: slots,
+        numSessions: numSessions,
     };
 }

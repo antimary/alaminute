@@ -1,5 +1,5 @@
 
-import { getSpace } from './slots.js';
+import { slotUtils } from './slots.js';
 
 export function showRecipeView (slots) {
     var mainContent = document.getElementById('main-content');
@@ -47,10 +47,36 @@ export function showRecipeView (slots) {
         id: 'recipe-summary',
     });
     recipeSummary.style.color = 'grey';
-    recipeSummary.style.fontSize = '80%';
-    recipeSummary.appendChild(document.createTextNode('5 slots, 1h7m, 1-2d'))
+    recipeSummary.style.fontSize = '75%';
+    recipeSummary.appendChild(document.createElement('div')).appendChild(
+        document.createTextNode(getHeaderSummary(slots))
+    );
+    recipeSummary.appendChild(document.createElement('div')).appendChild(
+        document.createTextNode('1h 7m (start 10h ahead)')
+    );
+    // recipeSummary.appendChild(document.createTextNode('5 slots, 1h7m, 1-2d'))
 
     showSlots(slots, recipeView);
+}
+
+function getHeaderSummary (slots) {
+    let summaryText = '';
+    if (slots.numSessions > 0) {
+        summaryText += slots.numSessions + ' session';
+        if (slots.numSessions > 1) {
+            summaryText += 's';
+        }
+    }
+    if (slotUtils.getNumThaws(slots) > 0) {
+        if (summaryText) {
+            summaryText += ' / ';
+        }
+        summaryText += slotUtils.getNumThaws(slots) + ' thaw';
+        if (slotUtils.getNumThaws(slots) > 1) {
+            summaryText += 's';
+        }
+    }
+    return summaryText;
 }
 
 function showSlot(slot, parent, index) {
@@ -66,14 +92,26 @@ function showSlot(slot, parent, index) {
         id: 'slot-header-' + slot.graphName + '-' + index,
     });
     slotHeader.style.margin = '10px';
-    slotHeader.appendChild(document.createElement('div')).appendChild(document.createTextNode('Time: ' + slot.time));
+    var slotHeaderText = slotHeader.appendChild(document.createElement('div'));
+    let slotName = slot.name;
+    if (slot.longestStep.node) {
+        slotName += ' (' + slot.longestStep.node + ')';
+    }
+    slotHeaderText.appendChild(document.createElement('div')).appendChild(document.createTextNode(slotName));
+    var slotTime = slotHeaderText.appendChild(document.createElement('div'));
+    slotTime.style.fontSize = '80%';
+    slotTime.style.color = 'darkslategrey';
+    slotTime.appendChild(document.createTextNode(slot.time + 'm'));
 
     var slotContent = Object.assign(slotView.appendChild(document.createElement('div')), {
         id: 'slot-content-' + slot.graphName + '-' + index,
     });
     slotContent.style.margin = '10px';
+    slotContent.style.fontSize = '80%';
     for (let i=0; i<slot.steps.length; i++) {
-        slotContent.appendChild(document.createElement('div')).appendChild(document.createTextNode(slot.steps[i].instructions));
+        let slotStep = slotContent.appendChild(document.createElement('div'));
+        slotStep.appendChild(document.createTextNode(slot.steps[i].instructions));
+        slotStep.style.margin = '5px 0';
     }
 }
 
@@ -93,14 +131,19 @@ function formatSpace(spaceTime) {
 }
 
 function showSpace(prevSlot, nextSlot, parent) {
-    let spaceTime = getSpace(prevSlot, nextSlot);
+    let spaceTime = slotUtils.getSpace(prevSlot, nextSlot);
     if (spaceTime > 0) {
         let spaceView = Object.assign(parent.appendChild(document.createElement('div')), {
             id: 'space-' + prevSlot.graphName + '-' + nextSlot.graphName,
         });
-        spaceView.appendChild(document.createElement('div')).appendChild(
-            document.createTextNode(formatSpace(spaceTime))
-        );
+        spaceView.style.fontSize = '80%';
+        spaceView.style.color = 'darkslategrey';
+        spaceView.style.border = 'thin solid grey';
+        spaceView.style.backgroundColor = 'white';
+        spaceView.style.display = 'inline-block';
+        let spaceTimeView = spaceView.appendChild(document.createElement('div'));
+        spaceTimeView.style.margin = '5px';
+        spaceTimeView.appendChild(document.createTextNode(formatSpace(spaceTime)));
     }
 }
 
