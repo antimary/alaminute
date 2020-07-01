@@ -174,6 +174,15 @@ export var slotUtils = {
         }
         return numThaws;
     },
+
+    getSlotTime (slots) {
+        let slotTime = 0;
+        for (let i=0; i<slots.slots.length; i++) {
+            let currSlot = slots.slots[i];
+            slotTime += currSlot.slotTime;
+        }
+        return slotTime;
+    },
 }
 
 function fillSlot (graph, order, maxTime, type, slotName) {
@@ -244,5 +253,6 @@ for (let graphName in graphs) {
         graph: graph,
         slots: slots,
         numSessions: numSessions,
+        totalTime: totalTime,
     };
 }

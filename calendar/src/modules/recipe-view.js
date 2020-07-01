@@ -49,17 +49,16 @@ export function showRecipeView (slots) {
     recipeSummary.style.color = 'grey';
     recipeSummary.style.fontSize = '75%';
     recipeSummary.appendChild(document.createElement('div')).appendChild(
-        document.createTextNode(getHeaderSummary(slots))
+        document.createTextNode(getSessionSummary(slots))
     );
     recipeSummary.appendChild(document.createElement('div')).appendChild(
-        document.createTextNode('1h 7m (start 10h ahead)')
+        document.createTextNode(getTimeSummary(slots))
     );
-    // recipeSummary.appendChild(document.createTextNode('5 slots, 1h7m, 1-2d'))
 
     showSlots(slots, recipeView);
 }
 
-function getHeaderSummary (slots) {
+function getSessionSummary (slots) {
     let summaryText = '';
     if (slots.numSessions > 0) {
         summaryText += slots.numSessions + ' session';
@@ -76,6 +75,14 @@ function getHeaderSummary (slots) {
             summaryText += 's';
         }
     }
+    return summaryText;
+}
+
+function getTimeSummary (slots) {
+    let summaryText = '';
+    summaryText += formatSpace(slotUtils.getSlotTime(slots));
+    summaryText += ' ';
+    summaryText += '(start ' + formatSpace(slots.totalTime) + ' ahead)';
     return summaryText;
 }
 
