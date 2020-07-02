@@ -3,13 +3,19 @@ import { slotsMap } from './modules/slots.js';
 import { RecipeList } from './modules/recipe-list.js';
 import { showRecipeView, hideRecipeView } from './modules/recipe-view.js';
 
-document.querySelector('#month').addEventListener('click', function () {
-    calendar.changeView('month', true);
-});
+let monthBtn = document.querySelector('#month');
+if (monthBtn) {
+    monthBtn.addEventListener('click', function () {
+        calendar.changeView('month', true);
+    });
+}
 
-document.querySelector('#prep').addEventListener('click', function () {
-    calendar.changeView('week', true);
-});
+let prepBtn = document.querySelector('#prep');
+if (prepBtn) {
+    prepBtn.addEventListener('click', function () {
+        calendar.changeView('week', true);
+    });
+}
 
 let recipeList = new RecipeList('recipe-list', slotsMap);
 recipeList.recipeList.addEventListener('click-recipe-list', function (event) {
