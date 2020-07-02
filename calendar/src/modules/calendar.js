@@ -2,7 +2,7 @@ import Calendar from '../../../tui.calendar'; /* ES6 */
 import "../../../tui.calendar/dist/tui-calendar.css";
 
 import { showRecipeView } from './recipe-view.js';
-import { slots } from './slots.js';
+import { slotsMap } from './slots.js';
 
 // If you use the default popups, use this.
 import '../../../tui.calendar/node_modules/tui-date-picker/dist/tui-date-picker.css';
@@ -41,7 +41,7 @@ calendar.on('clickSchedule', function(event) {
     var schedule = event.schedule;
     document.getElementById('calendar').style.display = 'none';
 
-    showRecipeView(slots[schedule.id].graph);
+    showRecipeView(slotsMap[schedule.id].graph);
     //alert(`clicked schedule ${schedule.id}`);
 });
 

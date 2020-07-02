@@ -1,15 +1,12 @@
 import { graphs } from './graphs.js';
 
-export var slots = {};
+export var slotsMap = {};
 
 var stepTimes = {};
 var accumSteps = [];
 var totalTime = 0;
+var numSessions = 0;
 var lastBreak = { node: null, time: null };
-
-slots.getGraphs = function () {
-    return graphs;
-}
 
 // Fill slot using activeTime as a proxy for step times.
 function fillSlot1 (graph, order, maxTime, type) {
@@ -41,13 +38,14 @@ function isType (graph, node, type) {
 }
 
 // Fill slot with accurate step times, accounting for edges, minTime, and activeTime.
-function fillSlot2 (graph, order, maxTime, type) {
+function fillSlot2 (graph, order, maxTime, type, slotName) {
     let slotTime = 0;
     let steps = [];
     let remaining = order.slice();
     let slotStartTime = Infinity;
     let minSlotStartTime = isType(graph, lastBreak.node, type) ? Math.max(lastBreak.time, totalTime) : totalTime;
     let totalActiveTime = 0;
+    let longestStep = { node: null, time: 0 }
 
     // Traverse topological sort in reverse
     for (var i=order.length-1; i>=0; i--) {
@@ -126,6 +124,11 @@ function fillSlot2 (graph, order, maxTime, type) {
                 break;
             }
 
+            if (nodeData.minTime > longestStep.time) {
+                longestStep.node = node;
+                longestStep.time = nodeData.minTime;
+            }
+
             totalTime = newTime;
             slotTime = newSlotTime;
             steps.unshift(nodeData);
@@ -136,11 +139,50 @@ function fillSlot2 (graph, order, maxTime, type) {
 
     accumSteps = steps.concat(accumSteps);
 
-    return { steps: steps, time: slotTime, remaining: remaining };
+    return { 
+        name: slotName, 
+        steps: steps, 
+        longestStep: longestStep, 
+        time: slotTime, 
+        start: slotStartTime, 
+        remaining: remaining 
+    };
 }
 
-function fillSlot (graph, order, maxTime, type) {
-    return fillSlot2(graph, order, maxTime, type);
+export var slotUtils = {
+    getSpace (prevSlot, nextSlot) {
+        let prevTime = prevSlot.start;
+        let nextTime = nextSlot.start + nextSlot.time;
+        return prevTime - nextTime;
+    },
+
+    isThaw (slot) {
+        return slot.longestStep.node.includes('thaw');
+    },
+
+    getNumThaws (slots) {
+        let numThaws = 0;
+        for (let i=0; i<slots.slots.length; i++) {
+            let currSlot = slots.slots[i];
+            if (this.isThaw(currSlot)) {
+                numThaws++;
+            }
+        }
+        return numThaws;
+    },
+
+    getSlotTime (slots) {
+        let slotTime = 0;
+        for (let i=0; i<slots.slots.length; i++) {
+            let currSlot = slots.slots[i];
+            slotTime += currSlot.time;
+        }
+        return slotTime;
+    },
+}
+
+function fillSlot (graph, order, maxTime, type, slotName) {
+    return fillSlot2(graph, order, maxTime, type, slotName);
 }
 
 function printSlot (slot) {
@@ -152,10 +194,21 @@ function printSlot (slot) {
     }
 }
 
+let stepSlotNames = ['Á la Minute', 'Prep'];
+let stepNameIndex = 0;
+let ingredientSlotNames = ['Mise'];
+let ingredientNameIndex = 0;
+
+function incrementNameIndex() {
+    stepNameIndex = Math.min(stepNameIndex + 1, stepSlotNames.length - 1);
+    ingredientNameIndex = Math.min(ingredientNameIndex + 1, ingredientSlotNames.length - 1);
+}
+
 for (let graphName in graphs) {
     stepTimes = {};
     accumSteps = [];
     totalTime = 0;
+    numSessions = 0;
 
     console.log('graphName');
     console.log(graphName);
@@ -166,25 +219,36 @@ for (let graphName in graphs) {
     console.log(order);
     let prevLength = 0;
     let slot;
+    let slots = [];
 
     while (order.length > 0 && order.length != prevLength) {
         prevLength = order.length;
 
-        slot = fillSlot(graph, order, 25, 'step');
+        slot = fillSlot(graph, order, 25, 'step', stepSlotNames[stepNameIndex]);
         order = slot.remaining;
         printSlot(slot);
-        slot = fillSlot(graph, order, 15, 'ingredient');
+        if (slot.steps.length) {
+            slots.unshift(slot);
+            numSessions++;  // Increment sessions for each steps slot
+        }
+        slot = fillSlot(graph, order, 15, 'ingredient', ingredientSlotNames[ingredientNameIndex]);
         order = slot.remaining;
-        printSlot(slot);   
+        printSlot(slot);
+        if (slot.steps.length) {
+            slots.unshift(slot);
+        }
+
+        incrementNameIndex();
 
         console.log('remaining');
         console.log(order);
     }
 
-    // TODO : Is this used anywhere?
-    slots[graphName] = {
+    slotsMap[graphName] = {
+        graphName: graphName,
         graph: graph,
-        steps: slot.steps,
-        time: slot.time,
+        slots: slots,
+        numSessions: numSessions,
+        totalTime: totalTime,
     };
 }
