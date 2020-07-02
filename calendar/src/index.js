@@ -14,8 +14,6 @@ document.querySelector('#prep').addEventListener('click', function () {
 let recipeList = new RecipeList('recipe-list', slotsMap);
 recipeList.recipeList.addEventListener('click-recipe-list', function (event) {
     let slot = event.detail;
-    console.log('click-recipe-list');
-    console.log(slot);
 
     let calendarContainer = document.getElementById('calendar-container');
     if (calendarContainer.style.display == 'none') {
@@ -25,8 +23,4 @@ recipeList.recipeList.addEventListener('click-recipe-list', function (event) {
         calendarContainer.style.display = 'none';
         showRecipeView(slot);
     }
-
-    //let recipeViewContainer = Object.assign(document.createElement('div'), { 'id': 'recipe-view-container' });
-    
 });
-console.log(slotsMap);

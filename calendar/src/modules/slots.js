@@ -39,7 +39,6 @@ function isType (graph, node, type) {
 
 // Fill slot with accurate step times, accounting for edges, minTime, and activeTime.
 function fillSlot2 (graph, order, maxTime, type, slotName) {
-    console.log('total-time : ' + totalTime);
     let slotTime = 0;
     let steps = [];
     let remaining = order.slice();
@@ -126,9 +125,6 @@ function fillSlot2 (graph, order, maxTime, type, slotName) {
             }
 
             if (nodeData.minTime > longestStep.time) {
-                console.log('longest step');
-                console.log(node);
-                console.log(nodeData.minTime);
                 longestStep.node = node;
                 longestStep.time = nodeData.minTime;
             }
