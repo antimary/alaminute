@@ -102,6 +102,59 @@ var karaageSchedule = [
     },
 ];
 
+var mealRoutine = [
+    {
+        id: '16',
+        calendarId: '3',
+        title: 'Dinner',
+        category: 'time',
+        dueDateClass: '',
+        start: '2020-05-29T18:30:00',
+        end: '2020-05-29T19:30:00',
+        isReadOnly: true    // schedule is read-only
+    },
+    {
+        id: '17',
+        calendarId: '3',
+        title: 'Dinner',
+        category: 'time',
+        dueDateClass: '',
+        start: '2020-05-30T18:30:00',
+        end: '2020-05-30T19:30:00',
+        isReadOnly: true    // schedule is read-only
+    },
+    {
+        id: '18',
+        calendarId: '3',
+        title: 'Dinner',
+        category: 'time',
+        dueDateClass: '',
+        start: '2020-05-31T18:30:00',
+        end: '2020-05-31T19:30:00',
+        isReadOnly: true    // schedule is read-only
+    },
+    {
+        id: '19',
+        calendarId: '3',
+        title: 'Lunch',
+        category: 'time',
+        dueDateClass: '',
+        start: '2020-05-29T12:00:00',
+        end: '2020-05-29T13:00:00',
+        isReadOnly: true    // schedule is read-only
+    },
+    {
+        id: '20',
+        calendarId: '3',
+        title: 'Lunch',
+        category: 'time',
+        dueDateClass: '',
+        start: '2020-05-30T12:00:00',
+        end: '2020-05-30T13:00:00',
+        isReadOnly: true    // schedule is read-only
+    },
+]
+
 function getScheduledSlots (scheduleId) {
     let result = null;
     let slotScheduleObj = slotSchedule[scheduleId];
@@ -141,7 +194,7 @@ calendar.setCalendarColor('2', {    // meals
     dragBgColor: '#dc9656',
 });
 calendar.setCalendarColor('3', {    // placeholders
-    bgColor: '#a9a9a9',
+    bgColor: '#f0f0f0',
 });
 calendar.setCalendarColor('errand', {  // errands
     bgColor: '#ffcccb',
@@ -371,4 +424,4 @@ var routineSchedule = [
     },
 ];
 
-calendar.createSchedules(karaageSchedule);
+calendar.createSchedules(karaageSchedule.concat(mealRoutine));
