@@ -2,7 +2,7 @@ import Calendar from '../../../tui.calendar'; /* ES6 */
 import "../../../tui.calendar/dist/tui-calendar.css";
 
 import { showRecipeView } from './recipe-view.js';
-import { slotsMap } from './slots.js';
+import { slotsMap, slotUtils } from './slots.js';
 
 // If you use the default popups, use this.
 import '../../../tui.calendar/node_modules/tui-date-picker/dist/tui-date-picker.css';
@@ -20,6 +20,117 @@ export var calendar = new Calendar('#calendar', {
         workweek: 3,
     }
 });
+
+function createSlotSchedule (scheduleId, recipeName, slotIds) {
+    return {
+        scheduleId: scheduleId,
+        recipeName: recipeName,
+        slotIds: slotIds,
+    };
+}
+
+var slotSchedule = {
+//    '9': createSlotSchedule('9', 'karaage/rice-peas/spin-ses/pepp-dash'),
+//    '1': createSlotSchedule('1', 'karaage/rice-peas/spin-ses/pepp-dash', [7, 8]),
+   '9': createSlotSchedule('9', 'karaage'),
+   '1': createSlotSchedule('1', 'karaage', [3, 4]),
+   '7': createSlotSchedule('7', 'karaage', [3, 4]),
+   '6': createSlotSchedule('6', 'karaage', [1, 2]),
+   '5': createSlotSchedule('5', 'karaage', [1, 2]),
+   '8': createSlotSchedule('8', 'karaage', [0]),
+}
+
+var karaageSchedule = [
+    {
+        id: '9',
+        calendarId: '2',
+        title: 'Lunch (Karaage Bento)',
+        category: 'time',
+        dueDateClass: '',
+        start: '2020-05-31T12:00:00',
+        end: '2020-05-31T13:00:00',
+        isReadOnly: true    // schedule is read-only
+    },
+    {
+        id: '1',
+        calendarId: '1',
+        title: 'Á la Minute (fry-chicken) ',
+        category: 'time',
+        dueDateClass: '',
+        start: '2020-05-31T11:30:00',
+        end: '2020-05-31T12:00:00'
+    },
+    {
+        id: '7',
+        calendarId: '1',
+        title: 'Mise (heat-oil)',
+        category: 'time',
+        dueDateClass: '',
+        start: '2020-05-31T10:45:00',
+        end: '2020-05-31T11:00:00',
+        isReadOnly: true    // schedule is read-only
+    },
+    {
+        id: '6',
+        calendarId: '1',
+        title: 'Prep (marinate-chicken)',
+        category: 'time',
+        dueDateClass: '',
+        start: '2020-05-31T08:00:00',
+        end: '2020-05-31T08:30:00',
+        isReadOnly: true    // schedule is read-only
+    },
+    {
+        id: '5',
+        calendarId: '1',
+        title: 'Mise (marinade-ginger)',
+        category: 'time',
+        dueDateClass: '',
+        start: '2020-05-31T07:15:00',
+        end: '2020-05-31T07:30:00',
+        isReadOnly: true    // schedule is read-only
+    },
+    {
+        id: '8',
+        calendarId: '1',
+        title: 'Mise (chicken-thaw)',
+        category: 'time',
+        dueDateClass: '',
+        start: '2020-05-30T19:30:00',
+        end: '2020-05-30T20:00:00',
+        isReadOnly: false    // can move?
+    },
+];
+
+function getScheduledSlots (scheduleId) {
+    let result = null;
+    let slotScheduleObj = slotSchedule[scheduleId];
+    if (slotScheduleObj) {
+        let slotsObj = slotsMap[slotScheduleObj.recipeName];
+        let slotIds = slotScheduleObj.slotIds;
+        if (slotIds) {
+            result = slotUtils.copySlotsObj(slotsObj);
+            let filteredSlots = [];
+            let totalTime = 0;
+            let prevSlot = null;
+            for (let i=0; i<slotIds.length; i++) {
+                let slot = slotsObj.slots[slotIds[i]];
+                filteredSlots.push(slot);
+                totalTime += slot.time;
+                if (prevSlot) {
+                    totalTime += slotUtils.getSpace(prevSlot, slot);
+                }
+                prevSlot = slot;
+            }
+            result.slots = filteredSlots;
+            result.totalTime = totalTime;
+            result.numSessions = 1;
+        } else {
+            result = slotsObj;
+        }
+    }
+    return result;
+}
 
 calendar.setDate(startDate);
 
@@ -39,11 +150,22 @@ calendar.setCalendarColor('busy', {bgColor: '#d3d3d3'});
 
 calendar.on('clickSchedule', function(event) {
     var schedule = event.schedule;
-    document.getElementById('calendar').style.display = 'none';
 
-    showRecipeView(slotsMap[schedule.id].graph);
+    let slotsObj = getScheduledSlots(schedule.id);
+    if (slotsObj) {
+        document.getElementById('calendar').style.display = 'none';
+        showRecipeView(slotsObj);
+    }
+    
     //alert(`clicked schedule ${schedule.id}`);
 });
+
+calendar.on('beforeUpdateSchedule', function (event) {
+    var schedule = event.schedule;
+    var changes = event.changes;
+
+    calendar.updateSchedule(schedule.id, schedule.calendarId, changes);
+})
 
 window.addEventListener('gcal-loaded', function (e) {
     let upcomingEvents = e.detail.upcomingEvents;
@@ -67,11 +189,11 @@ window.addEventListener('gcal-loaded', function (e) {
     calendar.createSchedules(busySchedules);
 });
 
-calendar.createSchedules([
+var routineSchedule = [
     {
         id: '1',
         calendarId: '1',
-        title: 'Supp (kara-cook) ',
+        title: 'Á la Minute (fry-chicken) ',
         category: 'time',
         dueDateClass: '',
         start: '2020-05-31T11:30:00',
@@ -130,7 +252,7 @@ calendar.createSchedules([
     {
         id: '7',
         calendarId: '1',
-        title: 'Mise (kara-mise)',
+        title: 'Mise (heat-oil)',
         category: 'time',
         dueDateClass: '',
         start: '2020-05-31T10:45:00',
@@ -148,9 +270,9 @@ calendar.createSchedules([
         isReadOnly: true    // schedule is read-only
     },
     {
-        id: 'karaage',
+        id: '9',
         calendarId: '2',
-        title: 'Lunch (karaage / rice-peas-pepp / spin)',
+        title: 'Lunch (Karaage Bento)',
         category: 'time',
         dueDateClass: '',
         start: '2020-05-31T12:00:00',
@@ -247,4 +369,6 @@ calendar.createSchedules([
         end: '2020-05-29T19:30:00',
         isReadOnly: true    // schedule is read-only
     },
-]);
+];
+
+calendar.createSchedules(karaageSchedule);

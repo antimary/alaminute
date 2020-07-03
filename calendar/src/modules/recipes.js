@@ -116,7 +116,7 @@ graph.nodeDatas = {
         '4 T soy sauce',
     ),
     'green-onion': createNodeData(
-        'green-onion', 5, 5, 2*60,
+        'green-onion', 3, 3, 2*60,
         '4 T finely chopped green onion',
     ),
     'kara-sugar': createNodeData(
@@ -128,7 +128,7 @@ graph.nodeDatas = {
         'Few drops sesame oil',
     ),
     'sauce-ginger': createNodeData(
-        'sauce-ginger', 5, 5, 2*60,
+        'sauce-ginger', 3, 3, 2*60,
         '1.33 T peeled and grated fresh ginger',
     ),
     'sauce': createNodeData(
