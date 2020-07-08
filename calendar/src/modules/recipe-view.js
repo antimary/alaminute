@@ -11,7 +11,7 @@ export function showRecipeView (slots) {
     var recipeView = Object.assign(recipeViewParent.appendChild(document.createElement('div')), {
         id: 'recipe-view',
     });
-    recipeView.style.width = '500px';
+    recipeView.style.width = '550px';
     recipeView.style.display = 'inline-block';
 
     // Header section
