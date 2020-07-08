@@ -236,6 +236,8 @@ for (let graphName in graphs) {
     accumSteps = [];
     totalTime = 0;
     numSessions = 0;
+    stepNameIndex = 0;
+    ingredientNameIndex = 0;
 
     console.log('graphName');
     console.log(graphName);
