@@ -7,6 +7,7 @@ import { slotsMap, slotUtils } from './slots.js';
 // If you use the default popups, use this.
 import '../../../tui.calendar/node_modules/tui-date-picker/dist/tui-date-picker.css';
 import '../../../tui.calendar/node_modules/tui-time-picker/dist/tui-time-picker.css';
+import { RecipeList } from './recipe-list';
 
 // ****************************************
 // TUI CALENDAR
@@ -153,7 +154,20 @@ var mealRoutine = [
         end: '2020-05-30T13:00:00',
         isReadOnly: true    // schedule is read-only
     },
-]
+];
+
+var initRoutine = [
+    {
+        id: '21',
+        calendarId: '3',
+        title: 'Lunch',
+        category: 'time',
+        dueDateClass: '',
+        start: '2020-05-31T12:00:00',
+        end: '2020-05-31T13:00:00',
+        isReadOnly: true    // schedule is read-only
+    },
+];
 
 function getScheduledSlots (scheduleId) {
     let result = null;
@@ -204,13 +218,29 @@ calendar.setCalendarColor('busy', {bgColor: '#d3d3d3'});
 calendar.on('clickSchedule', function(event) {
     var schedule = event.schedule;
 
-    let slotsObj = getScheduledSlots(schedule.id);
-    if (slotsObj) {
-        document.getElementById('calendar').style.display = 'none';
-        showRecipeView(slotsObj);
+    // Routine calendar
+    if (schedule.calendarId == '3') {
+        document.getElementById('modal').style.display = 'block';
+        let recipeModal = new RecipeList('modal-content', slotsMap);
+        recipeModal.recipeList.addEventListener('click-recipe-list', function (event) {
+            let slotsObj = event.detail;
+            if (slotsObj.graphName == 'karaage') {
+                calendar.clear();
+                calendar.createSchedules(mealRoutine);
+                calendar.createSchedules(karaageSchedule);
+            }
+
+            window.closeModal();
+        });
     }
-    
-    //alert(`clicked schedule ${schedule.id}`);
+    // Slots calendar
+    else {
+        let slotsObj = getScheduledSlots(schedule.id);
+        if (slotsObj) {
+            document.getElementById('calendar').style.display = 'none';
+            showRecipeView(slotsObj);
+        }
+    }
 });
 
 calendar.on('beforeUpdateSchedule', function (event) {
@@ -242,7 +272,7 @@ window.addEventListener('gcal-loaded', function (e) {
     calendar.createSchedules(busySchedules);
 });
 
-var routineSchedule = [
+var origRoutineSchedule = [
     {
         id: '1',
         calendarId: '1',
@@ -424,4 +454,4 @@ var routineSchedule = [
     },
 ];
 
-calendar.createSchedules(karaageSchedule.concat(mealRoutine));
+calendar.createSchedules(mealRoutine.concat(initRoutine));
