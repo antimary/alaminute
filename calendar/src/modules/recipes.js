@@ -46,8 +46,12 @@ function addType (graph, nodeName, type) {
     graph.nodeDatas[nodeName].type += type;
 }
 
+function addPreferredSlot (graph, nodeName, slotType) {
+    graph.nodeDatas[nodeName].preferredSlot = slotType;
+}
+
 export function addFinish(graph) {
-    graph.nodeDatas['finish'] = createNodeData('finish', 2, 2, 5, 'Serve');
+    graph.nodeDatas['finish'] = createNodeData('finish', 1, 1, 5, 'Serve');
     addType(graph, 'finish', 'step');
 }
 
@@ -77,7 +81,7 @@ graph.nodeDatas = {
         '4 T sake',
     ),
     'marinade-ginger': createNodeData(
-        'marinade-ginger', 5, 5, 2*60,
+        'marinade-ginger', 3, 3, 2*60,
         '1.33 T peeled and grated fresh ginger',
     ),
     'marinate-chicken': createNodeData(
@@ -105,7 +109,8 @@ graph.nodeDatas = {
     ),
     'fry-chicken': createNodeData(
         'fry-chicken', 10, 10, 15,
-        'Fry the chicken pieces in the oil, turning once, until a deep golden brown. Drain well on paper towels.',
+        'Fry the chicken pieces in the oil, turning once, until a deep golden brown. \
+        Drain well on paper towels.',
     ),
     'rice-vinegar': createNodeData(
         'rice-vinegar', 1, 1, Infinity,
@@ -167,9 +172,27 @@ addIngredient(graph, 'green-onion');
 addIngredient(graph, 'kara-sugar');
 addIngredient(graph, 'sesame-oil');
 addIngredient(graph, 'sauce-ginger');
-addStep(graph, 'sauce', 'rice-vinegar', 'sauce-soy', 'green-onion', 'kara-sugar', 'sesame-oil', 'sauce-ginger');
+addStep(
+    graph, 
+    'sauce', 
+    'rice-vinegar', 'sauce-soy', 'green-onion', 'kara-sugar', 'sesame-oil', 'sauce-ginger');
 addProduct(graph, 'toss', 'fry-chicken', 'sauce');
 
+addPreferredSlot(graph, 'chicken-thaw', 'thaw');
+
+addPreferredSlot(graph, 'vegetable-oil', 'alm');
+addPreferredSlot(graph, 'cornstarch', 'alm');
+
+addPreferredSlot(graph, 'rice-vinegar', 'alm');
+addPreferredSlot(graph, 'sauce-soy', 'alm');
+addPreferredSlot(graph, 'green-onion', 'alm');
+addPreferredSlot(graph, 'kara-sugar', 'alm');
+addPreferredSlot(graph, 'sesame-oil', 'alm');
+addPreferredSlot(graph, 'sauce-ginger', 'alm');
+
+addPreferredSlot(graph, 'marinade-soy', 'feat');
+addPreferredSlot(graph, 'sake', 'feat');
+addPreferredSlot(graph, 'marinade-ginger', 'feat');
 
 // ********************************
 // Rice with Peas graph
@@ -188,12 +211,13 @@ graph.nodeDatas = {
         '1 c white rice',
     ),
     'set-rice': createNodeData(
-        'set-rice', 5, 50, 24*60,
+        'set-rice', 4, 50, 24*60,
         'Rinse rice until water runs clear (~3x), fill rice cooker to appropriate level and set timer',
     ),
     'cook-peas': createNodeData(
         'cook-peas', 5, 5, 15,
-        'Put the peas in a small bowl with a pinch of salt and enough water to cover. Cover with plastic wrap, and microwave on high for 1 minute',
+        'Put the peas in a small bowl with a pinch of salt and enough water to cover. \
+        Cover with plastic wrap, and microwave on high for 1 minute',
     ),
     'mix-rice': createNodeData(
         'mix-rice', 2, 2, 10,
@@ -221,7 +245,7 @@ graph.title = 'Blanched Spinach with Sesame Sauce';
 graph.img = './assets/spinach-sesame.jpg';
 graph.nodeDatas = {
     'spinach': createNodeData(
-        'spinach', 5, 15, 2*60,
+        'spinach', 3, 15, 2*60,
         '3 1/2 oz spinach leaves, washed',
     ),
     'tahini': createNodeData(
@@ -250,11 +274,15 @@ graph.nodeDatas = {
     ),
     'cook-spin': createNodeData(
         'cook-spin', 5, 5, 2*60,
-        'Boil the spinach for 1 minute. Drain, then fill the pan with cold water, repeating until the spinach is cooled. Squeeze out as much water as possible from the cooked spinach, then form it into a log shape. Cut the spinach into even pieces.',
+        'Boil the spinach for 1 minute. Drain, then fill the pan with cold water, \
+        repeating until the spinach is cooled. Squeeze out as much water as possible \
+        from the cooked spinach, then form it into a log shape. Cut the spinach into even pieces.',
     ),
     'mix-spin': createNodeData(
         'mix-spin', 5, 5, 2*60,
-        'In a small bowl, mix together the tahini, 1/2 t of toasted white sesame seeds, sugar, and soy sauce, pressing down to grind up the sesame seeds and sugar slightly. Add the spinach and mix well.'
+        'In a small bowl, mix together the tahini, 1/2 t of toasted white sesame seeds, \
+        sugar, and soy sauce, pressing down to grind up the sesame seeds and sugar slightly. \
+        Add the spinach and mix well.'
     ),
     'serve-spin': createNodeData(
         'serve-spin', 2, 2, 2*60,
@@ -300,11 +328,16 @@ graph.nodeDatas = {
     ),
     'cook-pepp': createNodeData(
         'cook-pepp', 5, 20, 2*60,
-        'Cut the sweet peppers into slices or shapes. Place in a small pan, and add enough dashi or chicken stock to cover; add salt to taste. Heat on high until the stock is bubbling, then lower the heat and gently simmer for 4-5 minutes until the pepper pieces are tender.',
+        'Cut the sweet peppers into slices or shapes. \
+        Place in a small pan, and add enough dashi or chicken stock to cover; \
+        add salt to taste. Heat on high until the stock is bubbling, \
+        then lower the heat and gently simmer for 4-5 minutes until the pepper pieces are tender.',
     ),
     'serve-pepp': createNodeData(
         'serve-pepp', 5, 5, 2*60,
-        "Here I have used pieces cut out with a small rabbit-shaped cookie cutter. The leftover bits of sweet pepper don't go to waste--I just chop them up finely and mix them in with the rice.",
+        "Here I have used pieces cut out with a small rabbit-shaped cookie cutter. \
+        The leftover bits of sweet pepper don't go to waste--\
+        I just chop them up finely and mix them in with the rice.",
     ),
 };
 
@@ -318,6 +351,9 @@ addStep(graph, 'cook-pepp', 'pepp', 'dashi', 'salt');
 addProduct(graph, 'serve-pepp', 'cook-pepp');
 
 export function computeCriticalSort(graph) {
+    // Remove block-style comments to enable critical-distance-sorting
+
+    /*
     // Calculate critical path for recipe graph
     var criticalPathObj = graph.criticalPath();
     var criticalPath = criticalPathObj.path;
@@ -331,21 +367,44 @@ export function computeCriticalSort(graph) {
 
     // Calculate distance from each node to the nearest critical node
     var distances = graph.distanceFromPath(criticalPath, 'start');
+    */
 
-    // Set a function on the graph to sort nodes in order of increasing critical distance
-    var criticalSort = function (nodes) {
+    // Set a function on the graph to sort nodes on 2 properties
+    // (1) in order of increasing preferred-slot-index
+    // (2) in order of increasing critical distance
+    var slotCriticalSort = function (nodes) {
         let result = [];
+
+        function getSlotIndex (node) {
+            let slotOrder = ['thaw', 'feat', 'simm', 'alm'];
+            // Preferred slot params
+            let data = graph.nodeDatas[node];
+            let pref = data ? data.preferredSlot : undefined;
+            let slotIndex = 1;  // Default to middle value (simm)
+            if (pref) {
+                slotIndex = slotOrder.indexOf(pref);
+            }
+            return slotIndex;
+        }
+
         for (let i=0; i<nodes.length; i++) {
-            let dist = distances[nodes[i]];
+            /*let dist = distances[nodes[i]];*/
+            let nodeSlotIndex = getSlotIndex(nodes[i]);
+            // Sort result by preferred slot, then by critical distance
             let j=0;
-            while (j < result.length && distances[result[j]] > dist) {
+            while (j < result.length && (
+                getSlotIndex(result[j]) > nodeSlotIndex /*|| (
+                    getSlotIndex(result[j]) == nodeSlotIndex && distances[result[j]] > dist
+                )*/
+            )) {
                 j++;
             }
-            result.splice(j, 0, nodes[i]);
+            result.splice(j, 0, nodes[i]);  // Insert nodes[i] into result @ position j
         }
+
         return result;
     }
-    return criticalSort;
+    return slotCriticalSort;
 }
 
 // ********************************
