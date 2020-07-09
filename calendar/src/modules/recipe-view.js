@@ -86,7 +86,7 @@ function getTimeSummary (slots) {
     return summaryText;
 }
 
-function showSlot(slot, parent, index) {
+function showSlot(slot, parent, index, showDetail) {
     var slotView = Object.assign(parent.appendChild(document.createElement('div')), {
         id: 'slot-' + slot.graphName + '-' + index,
     });
@@ -117,7 +117,11 @@ function showSlot(slot, parent, index) {
     slotContent.style.fontSize = '80%';
     for (let i=0; i<slot.steps.length; i++) {
         let slotStep = slotContent.appendChild(document.createElement('div'));
-        slotStep.appendChild(document.createTextNode(slot.steps[i].instructions));
+        let stepText = slot.steps[i].instructions;
+        if (showDetail) {
+            stepText = slot.steps[i].name + ' (' + slot.steps[i].activeTime + ') -- ' + stepText;
+        }
+        slotStep.appendChild(document.createTextNode(stepText));
         slotStep.style.margin = '5px 0';
     }
 }
@@ -161,7 +165,7 @@ function showSlots(slots, parent) {
         if (currSlot && prevSlot) {
             showSpace(prevSlot, currSlot, parent);
         }
-        showSlot(currSlot, parent, i);
+        showSlot(currSlot, parent, i, (slots.graphName.includes('/') && slots.slots[i].type == 'step'));
         prevSlot = currSlot;
     }
 }

@@ -254,6 +254,7 @@ for (let graphName in graphs) {
         prevLength = order.length;
 
         slot = fillSlot(graph, order, 25, 'step', stepSlotNames[stepNameIndex]);
+        slot.type = 'step';
         order = slot.remaining;
         printSlot(slot);
         if (slot.steps.length) {
@@ -261,6 +262,7 @@ for (let graphName in graphs) {
             numSessions++;  // Increment sessions for each steps slot
         }
         slot = fillSlot(graph, order, 15, 'ingredient', ingredientSlotNames[ingredientNameIndex]);
+        slot.type = 'ingredient';
         order = slot.remaining;
         printSlot(slot);
         if (slot.steps.length) {
