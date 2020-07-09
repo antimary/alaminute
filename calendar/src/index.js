@@ -26,18 +26,27 @@ if (prepBtn) {
     });
 }
 
+let calendarTab = document.querySelector('#calendar-tab');
+if (calendarTab) {
+    calendarTab.addEventListener('click', function () {
+        document.querySelector('#calendar-container').style.display = 'block';
+        document.querySelector('#recipe-list').style.display = 'none';
+        hideRecipeView();
+    });
+}
+let recipeTab = document.querySelector('#recipe-tab');
+if (recipeTab) {
+    recipeTab.addEventListener('click', function () {
+        document.querySelector('#recipe-list').style.display = 'block';
+        document.querySelector('#calendar-container').style.display = 'none';
+        hideRecipeView();
+    });
+}
+
 let recipeList = new RecipeList('recipe-list', slotsMap);
 recipeList.recipeList.addEventListener('click-recipe-list', function (event) {
     let slot = event.detail;
-
-    let calendarContainer = document.getElementById('calendar-container');
-    if (calendarContainer.style.display == 'none') {
-        calendarContainer.style.display = 'block';
-        hideRecipeView();
-    } else {
-        calendarContainer.style.display = 'none';
-        showRecipeView(slot);
-    }
+    showRecipeView(slot);
 });
 
 document.getElementById('close').onclick = function () {

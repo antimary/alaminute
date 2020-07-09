@@ -30,6 +30,8 @@
             border: 1px solid #888;
             width: 500px;
         }
+
+
     </style>
 
     <head>
@@ -46,11 +48,15 @@
                     <span id='close' class='close'>&times;</span>
                 </div>
             </div>
-            <div id='top-nav'>
-                <pre id="content" style="white-space: pre-wrap;"></pre>
+            <div id='top-nav' style='margin: 10px'>
+                <pre id='content' style="white-space: pre-wrap;"></pre>
+                <div id='tabs' class='tab'>
+                    <button id='calendar-tab' class='tablinks'>Calendar</button>
+                    <button id='recipe-tab' class='tablinks'>Recipes</button>
+                </div>
             </div>
             <div id='main-content'>
-                <div id='recipe-list'></div>
+                <div id='recipe-list' style='display: none; width: 500px; margin-left: auto; margin-right: auto;'></div>
                 <div id='calendar-container'>
                     <div id='calendar-nav'>
                         <!-- <button id='month'>month</button> -->

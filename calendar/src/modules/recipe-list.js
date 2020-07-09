@@ -7,12 +7,11 @@ export class RecipeList {
     }
 
     createRecipeList (parent, slotsMap) {
-        parent.style.display = 'inline-block';
         // Create recipes header
         let header = parent.appendChild(document.createElement('div'));
         header.style.textAlign = 'center';
         header.style.fontSize = '2.5vw';
-        header.appendChild(document.createTextNode('Recipes'));
+        /*header.appendChild(document.createTextNode('Recipes'));*/
         // Create recipe cards
         for (let graphName in slotsMap) {
             this.createRecipeElement(parent, slotsMap[graphName]);

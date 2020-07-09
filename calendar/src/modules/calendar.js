@@ -237,7 +237,6 @@ calendar.on('clickSchedule', function(event) {
     else {
         let slotsObj = getScheduledSlots(schedule.id);
         if (slotsObj) {
-            document.getElementById('calendar').style.display = 'none';
             showRecipeView(slotsObj);
         }
     }

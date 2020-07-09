@@ -1,11 +1,22 @@
 
 import { slotUtils } from './slots.js';
 
-export function showRecipeView (slots) {
+export function showRecipeView (slotsObj) {
+    document.querySelector('#recipe-list').style.display = 'none';
+    document.querySelector('#calendar-container').style.display = 'none';
+    createRecipeView(slotsObj);
+}
+
+
+function createRecipeView (slots) {
     var mainContent = document.getElementById('main-content');
+
+    hideRecipeView();
+
     var recipeViewParent = Object.assign(mainContent.appendChild(document.createElement('div')), {
         id: 'recipe-view-parent',
     });
+
     recipeViewParent.style.width = '100%';
     recipeViewParent.style.textAlign = 'center';
     var recipeView = Object.assign(recipeViewParent.appendChild(document.createElement('div')), {
@@ -173,5 +184,7 @@ function showSlots(slots, parent) {
 export function hideRecipeView () {
     var mainContent = document.getElementById('main-content');
     var recipeViewParent = document.getElementById('recipe-view-parent');
-    mainContent.removeChild(recipeViewParent);
+    if (mainContent && recipeViewParent) {
+        mainContent.removeChild(recipeViewParent);
+    }
 }
