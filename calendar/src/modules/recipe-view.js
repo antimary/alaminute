@@ -1,17 +1,28 @@
 
 import { slotUtils } from './slots.js';
 
-export function showRecipeView (slots) {
+export function showRecipeView (slotsObj) {
+    document.querySelector('#recipe-list').style.display = 'none';
+    document.querySelector('#calendar-container').style.display = 'none';
+    createRecipeView(slotsObj);
+}
+
+
+function createRecipeView (slots) {
     var mainContent = document.getElementById('main-content');
+
+    hideRecipeView();
+
     var recipeViewParent = Object.assign(mainContent.appendChild(document.createElement('div')), {
         id: 'recipe-view-parent',
     });
+
     recipeViewParent.style.width = '100%';
     recipeViewParent.style.textAlign = 'center';
     var recipeView = Object.assign(recipeViewParent.appendChild(document.createElement('div')), {
         id: 'recipe-view',
     });
-    recipeView.style.width = '500px';
+    recipeView.style.width = '550px';
     recipeView.style.display = 'inline-block';
 
     // Header section
@@ -86,7 +97,7 @@ function getTimeSummary (slots) {
     return summaryText;
 }
 
-function showSlot(slot, parent, index) {
+function showSlot(slot, parent, index, showDetail) {
     var slotView = Object.assign(parent.appendChild(document.createElement('div')), {
         id: 'slot-' + slot.graphName + '-' + index,
     });
@@ -117,7 +128,11 @@ function showSlot(slot, parent, index) {
     slotContent.style.fontSize = '80%';
     for (let i=0; i<slot.steps.length; i++) {
         let slotStep = slotContent.appendChild(document.createElement('div'));
-        slotStep.appendChild(document.createTextNode(slot.steps[i].instructions));
+        let stepText = slot.steps[i].instructions;
+        if (showDetail) {
+            stepText = slot.steps[i].name + ' (' + slot.steps[i].activeTime + ') -- ' + stepText;
+        }
+        slotStep.appendChild(document.createTextNode(stepText));
         slotStep.style.margin = '5px 0';
     }
 }
@@ -161,7 +176,7 @@ function showSlots(slots, parent) {
         if (currSlot && prevSlot) {
             showSpace(prevSlot, currSlot, parent);
         }
-        showSlot(currSlot, parent, i);
+        showSlot(currSlot, parent, i, (slots.graphName.includes('/') && slots.slots[i].type == 'step'));
         prevSlot = currSlot;
     }
 }
@@ -169,5 +184,7 @@ function showSlots(slots, parent) {
 export function hideRecipeView () {
     var mainContent = document.getElementById('main-content');
     var recipeViewParent = document.getElementById('recipe-view-parent');
-    mainContent.removeChild(recipeViewParent);
+    if (mainContent && recipeViewParent) {
+        mainContent.removeChild(recipeViewParent);
+    }
 }

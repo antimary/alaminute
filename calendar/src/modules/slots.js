@@ -7,6 +7,7 @@ var accumSteps = [];
 var totalTime = 0;
 var numSessions = 0;
 var lastBreak = { node: null, time: null };
+var lastCont = { node: null, time: null };
 
 // Fill slot using activeTime as a proxy for step times.
 function fillSlot1 (graph, order, maxTime, type) {
@@ -44,8 +45,11 @@ function fillSlot2 (graph, order, maxTime, type, slotName) {
     let remaining = order.slice();
     let slotStartTime = Infinity;
     let minSlotStartTime = isType(graph, lastBreak.node, type) ? Math.max(lastBreak.time, totalTime) : totalTime;
+    minSlotStartTime = isType(graph, lastCont.node, type) ? Math.max(lastCont.time, minSlotStartTime) : minSlotStartTime;
     let totalActiveTime = 0;
     let longestStep = { node: null, time: 0 }
+
+    // Reset lastBreak/lastCont here?
 
     // Traverse topological sort in reverse
     for (var i=order.length-1; i>=0; i--) {
@@ -57,6 +61,7 @@ function fillSlot2 (graph, order, maxTime, type, slotName) {
             let nodeTime = 0;
             let nodeStartTime = 0;
             let shouldBreak = false;
+            let shouldContinue = false;
 
             if (steps.length == 0 && accumSteps.length == 0) {
                 // Always use activeTime for the first (last) step
@@ -104,12 +109,16 @@ function fillSlot2 (graph, order, maxTime, type, slotName) {
             let newSlotTime = newTime - slotStartTime;
 
             if (newSlotTime > maxTime) {
-                shouldBreak = true;
-                console.log('time-break');
+                if (isType(graph, node, 'step') && isType(graph, node, 'ingredient')) {
+                    console.log('time-cont');
+                    shouldContinue = true;
+                } else {
+                    console.log('time-break');
+                    shouldBreak = true;
+                }
             }
 
-            if (shouldBreak) {
-                console.log('break');
+            if (shouldBreak || shouldContinue) {
                 console.log(node);
                 console.log('new: ' + newTime);
                 console.log('node: ' + nodeTime);
@@ -117,11 +126,19 @@ function fillSlot2 (graph, order, maxTime, type, slotName) {
                 console.log('slot: ' + newSlotTime);
                 console.log('start: ' + slotStartTime);
                 console.log('max: ' + maxTime);
+            }
 
+            if (shouldBreak) {
+                console.log('break');
                 lastBreak.node = node;
                 lastBreak.time = nodeTime;
-                i++;
                 break;
+            }
+            if (shouldContinue) {
+                console.log('cont');
+                lastCont.node = node;
+                lastCont.time = nodeTime;
+                continue;
             }
 
             if (nodeData.minTime > longestStep.time) {
@@ -179,6 +196,16 @@ export var slotUtils = {
         }
         return slotTime;
     },
+
+    copySlotsObj(slotsObj) {
+        return {
+            graphName: slotsObj.graphName,
+            graph: slotsObj.graph,
+            slots: slotsObj.slots,
+            numSessions: slotsObj.numSessions,
+            totalTime: slotsObj.totalTime,
+        };
+    },
 }
 
 function fillSlot (graph, order, maxTime, type, slotName) {
@@ -209,6 +236,8 @@ for (let graphName in graphs) {
     accumSteps = [];
     totalTime = 0;
     numSessions = 0;
+    stepNameIndex = 0;
+    ingredientNameIndex = 0;
 
     console.log('graphName');
     console.log(graphName);
@@ -225,6 +254,7 @@ for (let graphName in graphs) {
         prevLength = order.length;
 
         slot = fillSlot(graph, order, 25, 'step', stepSlotNames[stepNameIndex]);
+        slot.type = 'step';
         order = slot.remaining;
         printSlot(slot);
         if (slot.steps.length) {
@@ -232,6 +262,7 @@ for (let graphName in graphs) {
             numSessions++;  // Increment sessions for each steps slot
         }
         slot = fillSlot(graph, order, 15, 'ingredient', ingredientSlotNames[ingredientNameIndex]);
+        slot.type = 'ingredient';
         order = slot.remaining;
         printSlot(slot);
         if (slot.steps.length) {
