@@ -22,7 +22,7 @@ function createRecipeView (slots) {
     var recipeView = Object.assign(recipeViewParent.appendChild(document.createElement('div')), {
         id: 'recipe-view',
     });
-    recipeView.style.width = '550px';
+    recipeView.style.maxWidth = '550px';
     recipeView.style.display = 'inline-block';
 
     // Header section

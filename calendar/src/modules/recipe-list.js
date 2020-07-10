@@ -10,7 +10,7 @@ export class RecipeList {
         // Create recipes header
         let header = parent.appendChild(document.createElement('div'));
         header.style.textAlign = 'center';
-        header.style.fontSize = '2.5vw';
+        /*header.style.fontSize = '2.5vw';*/
         /*header.appendChild(document.createTextNode('Recipes'));*/
         // Create recipe cards
         for (let graphName in slotsMap) {
@@ -21,8 +21,8 @@ export class RecipeList {
     createRecipeElement (parent, slots) {
         let element = parent.appendChild(document.createElement('div'));
         let recipeGraph = slots.graph;
-        element.style.fontSize = '1.5vw';
-        element.style.width = '500px';
+        element.style.fontSize = '75%';
+        element.style.maxWidth = '500px';
         element.style.height = '60px';
         element.style.textAlign = 'left';
         // Create image node (align-left)
