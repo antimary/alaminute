@@ -30,6 +30,10 @@ function createSlotSchedule (scheduleId, recipeName, slotIds) {
     };
 }
 
+var timezoneOffsetHours = new Date().getTimezoneOffset() / 60;
+console.log('timezone-offset');
+console.log(timezoneOffsetHours);
+
 var slotSchedule = {
 //    '9': createSlotSchedule('9', 'karaage/rice-peas/spin-ses/pepp-dash'),
 //    '1': createSlotSchedule('1', 'karaage/rice-peas/spin-ses/pepp-dash', [7, 8]),
@@ -110,8 +114,8 @@ var mealRoutine = [
         title: 'Dinner',
         category: 'time',
         dueDateClass: '',
-        start: '2020-05-29T18:30:00',
-        end: '2020-05-29T19:30:00',
+        start: '2020-05-29T18:30:00-0' + timezoneOffsetHours + ':00',
+        end: '2020-05-29T19:30:00-0' + timezoneOffsetHours + ':00',
         isReadOnly: true    // schedule is read-only
     },
     {
@@ -265,6 +269,8 @@ window.addEventListener('gcal-loaded', function (e) {
                 end: event.end.date ? event.end.date : event.end.dateTime,
                 category: 'time',
             }
+            console.log('schedule');
+            console.log(schedule);
             busySchedules.push(schedule);
         }
     }
