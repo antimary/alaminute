@@ -30,9 +30,10 @@ function createSlotSchedule (scheduleId, recipeName, slotIds) {
     };
 }
 
-var timezoneOffsetHours = new Date().getTimezoneOffset() / 60;
-console.log('timezone-offset');
-console.log(timezoneOffsetHours);
+function formatTimezone (dateTime) {
+    var timezoneOffsetHours = new Date().getTimezoneOffset() / 60;
+    return dateTime + '-' + ('0' + timezoneOffsetHours).slice(-2) + ':00';
+}
 
 var slotSchedule = {
 //    '9': createSlotSchedule('9', 'karaage/rice-peas/spin-ses/pepp-dash'),
@@ -52,8 +53,8 @@ var karaageSchedule = [
         title: 'Lunch (Karaage Bento)',
         category: 'time',
         dueDateClass: '',
-        start: '2020-05-31T12:00:00',
-        end: '2020-05-31T13:00:00',
+        start: formatTimezone('2020-05-31T12:00:00'),
+        end: formatTimezone('2020-05-31T13:00:00'),
         isReadOnly: true    // schedule is read-only
     },
     {
@@ -62,8 +63,8 @@ var karaageSchedule = [
         title: 'Á la Minute (fry-chicken) ',
         category: 'time',
         dueDateClass: '',
-        start: '2020-05-31T11:30:00',
-        end: '2020-05-31T12:00:00'
+        start: formatTimezone('2020-05-31T11:30:00'),
+        end: formatTimezone('2020-05-31T12:00:00')
     },
     {
         id: '7',
@@ -71,8 +72,8 @@ var karaageSchedule = [
         title: 'Mise (heat-oil)',
         category: 'time',
         dueDateClass: '',
-        start: '2020-05-31T10:45:00',
-        end: '2020-05-31T11:00:00',
+        start: formatTimezone('2020-05-31T10:45:00'),
+        end: formatTimezone('2020-05-31T11:00:00'),
         isReadOnly: true    // schedule is read-only
     },
     {
@@ -81,8 +82,8 @@ var karaageSchedule = [
         title: 'Prep (marinate-chicken)',
         category: 'time',
         dueDateClass: '',
-        start: '2020-05-31T08:00:00',
-        end: '2020-05-31T08:30:00',
+        start: formatTimezone('2020-05-31T08:00:00'),
+        end: formatTimezone('2020-05-31T08:30:00'),
         isReadOnly: true    // schedule is read-only
     },
     {
@@ -91,8 +92,8 @@ var karaageSchedule = [
         title: 'Mise (marinade-ginger)',
         category: 'time',
         dueDateClass: '',
-        start: '2020-05-31T07:15:00',
-        end: '2020-05-31T07:30:00',
+        start: formatTimezone('2020-05-31T07:15:00'),
+        end: formatTimezone('2020-05-31T07:30:00'),
         isReadOnly: true    // schedule is read-only
     },
     {
@@ -101,8 +102,8 @@ var karaageSchedule = [
         title: 'Mise (chicken-thaw)',
         category: 'time',
         dueDateClass: '',
-        start: '2020-05-30T19:30:00',
-        end: '2020-05-30T20:00:00',
+        start: formatTimezone('2020-05-30T19:30:00'),
+        end: formatTimezone('2020-05-30T20:00:00'),
         isReadOnly: false    // can move?
     },
 ];
@@ -114,8 +115,8 @@ var mealRoutine = [
         title: 'Dinner',
         category: 'time',
         dueDateClass: '',
-        start: '2020-05-29T18:30:00-0' + timezoneOffsetHours + ':00',
-        end: '2020-05-29T19:30:00-0' + timezoneOffsetHours + ':00',
+        start: formatTimezone('2020-05-29T18:30:00'),
+        end: formatTimezone('2020-05-29T19:30:00'),
         isReadOnly: true    // schedule is read-only
     },
     {
@@ -124,8 +125,8 @@ var mealRoutine = [
         title: 'Dinner',
         category: 'time',
         dueDateClass: '',
-        start: '2020-05-30T18:30:00',
-        end: '2020-05-30T19:30:00',
+        start: formatTimezone('2020-05-30T18:30:00'),
+        end: formatTimezone('2020-05-30T19:30:00'),
         isReadOnly: true    // schedule is read-only
     },
     {
@@ -134,8 +135,8 @@ var mealRoutine = [
         title: 'Dinner',
         category: 'time',
         dueDateClass: '',
-        start: '2020-05-31T18:30:00',
-        end: '2020-05-31T19:30:00',
+        start: formatTimezone('2020-05-31T18:30:00'),
+        end: formatTimezone('2020-05-31T19:30:00'),
         isReadOnly: true    // schedule is read-only
     },
     {
@@ -144,8 +145,8 @@ var mealRoutine = [
         title: 'Lunch',
         category: 'time',
         dueDateClass: '',
-        start: '2020-05-29T12:00:00',
-        end: '2020-05-29T13:00:00',
+        start: formatTimezone('2020-05-29T12:00:00'),
+        end: formatTimezone('2020-05-29T13:00:00'),
         isReadOnly: true    // schedule is read-only
     },
     {
@@ -154,8 +155,8 @@ var mealRoutine = [
         title: 'Lunch',
         category: 'time',
         dueDateClass: '',
-        start: '2020-05-30T12:00:00',
-        end: '2020-05-30T13:00:00',
+        start: formatTimezone('2020-05-30T12:00:00'),
+        end: formatTimezone('2020-05-30T13:00:00'),
         isReadOnly: true    // schedule is read-only
     },
 ];
@@ -167,8 +168,8 @@ var initRoutine = [
         title: 'Lunch',
         category: 'time',
         dueDateClass: '',
-        start: '2020-05-31T12:00:00',
-        end: '2020-05-31T13:00:00',
+        start: formatTimezone('2020-05-31T12:00:00'),
+        end: formatTimezone('2020-05-31T13:00:00'),
         isReadOnly: true    // schedule is read-only
     },
 ];
