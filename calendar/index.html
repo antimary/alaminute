@@ -40,7 +40,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
     </head>
     <body bgcolor='#f9f9f9'>
-        <div id='page-container' style='text-align:center'>
+        <div id='page-container' style='text-align:center; max-height:800px;'>
             <div id='page-header'>
                 <img src='alm.png' />
             </div>
@@ -56,18 +56,17 @@
                     <button id='recipe-tab' class='tablinks'>Recipes</button>
                 </div>
             </div>
-            <div id='main-content'>
+            <div id='main-content' style='flex: 0 1 auto'>
                 <div id='recipe-list' style='display: none; max-width: 500px; margin-left: auto; margin-right: auto;'></div>
                 <div id='calendar-container'>
                     <div id='calendar-nav'>
                         <!-- <button id='month'>month</button> -->
                         <!-- <button id='prep'>prep</button> -->
                     </div>
-                    <div id='calendar' style='height: 800px;'></div>
+                    <div id='calendar'></div>
                 </div>
             </div>
             <div id='bottom-nav' style='display:inline-block'>
-                <!--Add buttons to initiate auth sequence and sign out-->
                 <button id="authorize_button" style="display: none;">Authorize</button>
                 <button id="signout_button" style="display: none;">Sign Out</button>
             </div>

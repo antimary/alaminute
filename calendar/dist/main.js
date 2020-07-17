@@ -44390,7 +44390,7 @@ class RecipeList {
 // ****************************************
 var calendar = new tui_calendar_default.a('#calendar', {
     defaultView: 'week',
-    taskView: true,
+    taskView: false,
     week: {
         startDayOfWeek: 5,
         daynames: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
