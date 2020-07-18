@@ -44843,6 +44843,16 @@ calendar.createSchedules(mealRoutine.concat(initRoutine));
 
 
 
+let hamburgerIcon = document.querySelector('#hamburger-icon');
+hamburgerIcon.onclick = (event) => {
+    let hamburgerMenu = document.querySelector('#hamburger-menu');
+    if (hamburgerMenu.style.display == 'none') {
+        hamburgerMenu.style.display = 'inline-block';
+    } else {
+        hamburgerMenu.style.display = 'none';
+    }
+}
+
 window.modalContentIds = [];
 let modalChildren = document.getElementById('modal-content').children;
 for (let i=0; i<modalChildren.length; i++) {
