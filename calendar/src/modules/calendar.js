@@ -14,7 +14,7 @@ import { RecipeList } from './recipe-list';
 // ****************************************
 export var calendar = new Calendar('#calendar', {
     defaultView: 'week',
-    taskView: true,
+    taskView: false,
     week: {
         startDayOfWeek: 5,
         daynames: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],

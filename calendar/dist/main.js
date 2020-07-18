@@ -44390,7 +44390,7 @@ class RecipeList {
 // ****************************************
 var calendar = new tui_calendar_default.a('#calendar', {
     defaultView: 'week',
-    taskView: true,
+    taskView: false,
     week: {
         startDayOfWeek: 5,
         daynames: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -44842,6 +44842,16 @@ calendar.createSchedules(mealRoutine.concat(initRoutine));
 
 
 
+
+let hamburgerIcon = document.querySelector('#hamburger-icon');
+hamburgerIcon.onclick = (event) => {
+    let hamburgerMenu = document.querySelector('#hamburger-menu');
+    if (hamburgerMenu.style.display == 'none') {
+        hamburgerMenu.style.display = 'inline-block';
+    } else {
+        hamburgerMenu.style.display = 'none';
+    }
+}
 
 window.modalContentIds = [];
 let modalChildren = document.getElementById('modal-content').children;
