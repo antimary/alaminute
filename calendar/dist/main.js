@@ -17966,8 +17966,6 @@ var calendar = new tui_calendar_default.a('#calendar', {
         startDayOfWeek: 5,
         daynames: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         workweek: 3,
-        hourStart: 7,
-        hourEnd: 20,
     }
 });
 
@@ -18068,6 +18066,7 @@ var mealRoutine = [
         dueDateClass: '',
         start: formatTimezone('2020-05-29T18:30:00'),
         end: formatTimezone('2020-05-29T19:30:00'),
+        isReadOnly: true    // schedule is read-only
     },
     {
         id: '17',
@@ -18077,6 +18076,7 @@ var mealRoutine = [
         dueDateClass: '',
         start: formatTimezone('2020-05-30T18:30:00'),
         end: formatTimezone('2020-05-30T19:30:00'),
+        isReadOnly: true    // schedule is read-only
     },
     {
         id: '18',
@@ -18086,6 +18086,7 @@ var mealRoutine = [
         dueDateClass: '',
         start: formatTimezone('2020-05-31T18:30:00'),
         end: formatTimezone('2020-05-31T19:30:00'),
+        isReadOnly: true    // schedule is read-only
     },
     {
         id: '19',
@@ -18095,6 +18096,7 @@ var mealRoutine = [
         dueDateClass: '',
         start: formatTimezone('2020-05-29T12:00:00'),
         end: formatTimezone('2020-05-29T13:00:00'),
+        isReadOnly: true    // schedule is read-only
     },
     {
         id: '20',
@@ -18104,6 +18106,7 @@ var mealRoutine = [
         dueDateClass: '',
         start: formatTimezone('2020-05-30T12:00:00'),
         end: formatTimezone('2020-05-30T13:00:00'),
+        isReadOnly: true    // schedule is read-only
     },
 ];
 
@@ -18116,6 +18119,7 @@ var initRoutine = [
         dueDateClass: '',
         start: formatTimezone('2020-05-31T12:00:00'),
         end: formatTimezone('2020-05-31T13:00:00'),
+        isReadOnly: true    // schedule is read-only
     },
 ];
 
