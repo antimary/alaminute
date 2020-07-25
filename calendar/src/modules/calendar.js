@@ -35,6 +35,8 @@ function formatTimezone (dateTime) {
     return dateTime + '-' + ('0' + timezoneOffsetHours).slice(-2) + ':00';
 }
 
+var busySchedules = [];
+
 var slotSchedule = {
 //    '9': createSlotSchedule('9', 'karaage/rice-peas/spin-ses/pepp-dash'),
 //    '1': createSlotSchedule('1', 'karaage/rice-peas/spin-ses/pepp-dash', [7, 8]),
@@ -233,6 +235,7 @@ calendar.on('clickSchedule', function(event) {
                 calendar.clear();
                 calendar.createSchedules(mealRoutine);
                 calendar.createSchedules(karaageSchedule);
+                calendar.createSchedules(busySchedules);
             }
 
             window.closeModal();
@@ -257,7 +260,6 @@ calendar.on('beforeUpdateSchedule', function (event) {
 window.addEventListener('gcal-loaded', function (e) {
     let upcomingEvents = e.detail.upcomingEvents;
 
-    var busySchedules = [];
     var busyStartId = 100;
     if (upcomingEvents.length > 0) {
         for (let i=0; i<upcomingEvents.length; i++) {
